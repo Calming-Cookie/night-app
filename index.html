@@ -167,4 +167,13 @@
                     const m = Math.floor((updateDiff % (1000 * 60 * 60)) / (1000 * 60));
                     const s = Math.floor((updateDiff % (1000 * 60)) / 1000);
                     const mStr = m < 10 ? "0" + m : m;
-                    const
+                    const sStr = s < 10 ? "0" + s : s;
+                    document.getElementById('update-countdown').innerText = `${h}h ${mStr}m ${sStr}s`;
+                }
+            }
+        }
+        
+        fetchTimes();
+    </script>
+</body>
+</html>
