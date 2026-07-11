@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Night Times">
     <meta name="theme-color" content="#0d1117">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌙</text></svg>">
+    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cdefs%3E%3ClinearGradient id='b' x1='0' y1='0' x2='180' y2='180' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%230d1b2a'/%3E%3Cstop offset='1' stop-color='%231b2d45'/%3E%3C/linearGradient%3E%3CradialGradient id='g' cx='96' cy='80' r='52'%3E%3Cstop offset='0' stop-color='%23e8dcc8' stop-opacity='.28'/%3E%3Cstop offset='1' stop-color='%23e8dcc8' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='180' height='180' rx='40' fill='url(%23b)'/%3E%3Ccircle cx='96' cy='80' r='52' fill='url(%23g)'/%3E%3Cpath d='M103 36A44 44 0 1 0 103 128A33 33 0 1 1 103 36Z' fill='%23e8dcc8'/%3E%3Ccircle cx='46' cy='46' r='2.5' fill='%23fff' opacity='.9'/%3E%3Ccircle cx='144' cy='56' r='2' fill='%23fff' opacity='.7'/%3E%3Ccircle cx='40' cy='118' r='2' fill='%23fff' opacity='.6'/%3E%3Ccircle cx='140' cy='128' r='2.5' fill='%23fff' opacity='.8'/%3E%3Ccircle cx='56' cy='148' r='1.5' fill='%23fff' opacity='.5'/%3E%3Ccircle cx='137' cy='36' r='1.5' fill='%23fff' opacity='.65'/%3E%3Ccircle cx='68' cy='32' r='1' fill='%23fff' opacity='.4'/%3E%3Ccircle cx='152' cy='96' r='1' fill='%23fff' opacity='.45'/%3E%3C/svg%3E">
     <style>
         :root {
             --bg: #0d1117;
@@ -166,18 +166,18 @@
             will-change: transform, opacity;
         }
         .sparkle.trail {
-            width: 6px;
-            height: 6px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
-            animation: trailUp 1.4s ease-out forwards;
+            animation: trailUp 1.8s ease-out forwards;
         }
         .sparkle.tap {
             font-size: 11px;
             animation: drift 2.6s ease-out forwards;
         }
         @keyframes trailUp {
-            0%   { opacity: 0.65; transform: translateY(0) translateX(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-45px) translateX(var(--dx, 0px)) scale(0.1); }
+            0%   { opacity: 0.7; transform: translateY(0) translateX(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-60px) translateX(var(--dx, 0px)) scale(0.08); }
         }
         @keyframes drift {
             0%   { opacity: 0; transform: translateY(0) scale(0.2); }
@@ -345,20 +345,18 @@
             return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
         }
 
-        /* Trail sparkle: small glowing dot */
         function spawnTrail(x, y) {
             var el = document.createElement('div');
             el.className = 'sparkle trail';
-            el.style.left = (x - 3) + 'px';
-            el.style.top  = (y - 3) + 'px';
+            el.style.left = (x - 7) + 'px';
+            el.style.top  = (y - 7) + 'px';
             el.style.background = accentColor();
-            el.style.boxShadow = '0 0 6px ' + accentColor();
-            el.style.setProperty('--dx', ((Math.random() - 0.5) * 20) + 'px');
+            el.style.boxShadow = '0 0 12px ' + accentColor() + ', 0 0 24px ' + accentColor();
+            el.style.setProperty('--dx', ((Math.random() - 0.5) * 30) + 'px');
             document.body.appendChild(el);
-            setTimeout(function() { el.remove(); }, 1500);
+            setTimeout(function() { el.remove(); }, 1900);
         }
 
-        /* Tap sparkle: tiny text glyph */
         function spawnTapCluster(x, y) {
             var glyphs = ['·','✦','⋆','✧','·'];
             for (var i = 0; i < 4; i++) {
@@ -393,7 +391,7 @@
             e.preventDefault();
             if (!isTrailing) return;
             var now = Date.now();
-            if (now - lastTrailTime < 30) return; // throttle ~33fps
+            if (now - lastTrailTime < 25) return;
             lastTrailTime = now;
             var t = e.touches[0];
             spawnTrail(t.clientX, t.clientY);
@@ -401,7 +399,7 @@
 
         document.body.addEventListener('touchend', function() { isTrailing = false; }, { passive: true });
 
-        /* Mouse trail on empty background too */
+        /* Mouse drag trail on empty background */
         var mouseDown = false;
         var lastMouseTrail = 0;
         document.body.addEventListener('mousedown', function(e) {
@@ -412,13 +410,13 @@
         document.body.addEventListener('mousemove', function(e) {
             if (!mouseDown) return;
             var now = Date.now();
-            if (now - lastMouseTrail < 30) return;
+            if (now - lastMouseTrail < 25) return;
             lastMouseTrail = now;
             spawnTrail(e.clientX, e.clientY);
         });
         document.body.addEventListener('mouseup', function() { mouseDown = false; });
 
-        /* ═══ 2. Title: tap → simple glow ═══ */
+        /* ═══ 2. Title: tap → glow ═══ */
         var titleEl = document.getElementById('title');
         titleEl.addEventListener('click', function() {
             this.classList.add('glow');
@@ -426,7 +424,7 @@
             setTimeout(function() { self.classList.remove('glow'); }, 700);
         });
 
-        /* ═══ 3. Date: tap → cycle full / gregorian / hijri (kept animation) ═══ */
+        /* ═══ 3. Date: tap → cycle full / gregorian / hijri ═══ */
         var dateEl = document.getElementById('date-display');
         dateEl.addEventListener('click', function() {
             dateMode = (dateMode + 1) % 3;
@@ -441,7 +439,7 @@
             }, 260);
         });
 
-        /* ═══ 4. Card: tap → simple glow (replaced tilt) ═══ */
+        /* ═══ 4. Card: tap → glow ═══ */
         var card = document.getElementById('card');
         card.addEventListener('click', function() {
             this.classList.add('glow');
@@ -449,7 +447,7 @@
             setTimeout(function() { self.classList.remove('glow'); }, 900);
         });
 
-        /* ═══ 5. Moon label: tap → cycle phase emoji + pop (kept animation) ═══ */
+        /* ═══ 5. Moon label: tap → cycle phase emoji + pop ═══ */
         var midLabel = document.getElementById('mid-label');
         midLabel.addEventListener('click', function() {
             mi = (mi + 1) % moons.length;
@@ -457,7 +455,7 @@
             this.classList.remove('pop'); void this.offsetWidth; this.classList.add('pop');
         });
 
-        /* ═══ 6. Star label: tap → simple glow (replaced pop) ═══ */
+        /* ═══ 6. Star label: tap → cycle + glow ═══ */
         var ltLabel = document.getElementById('lt-label');
         ltLabel.addEventListener('click', function() {
             si = (si + 1) % starGlyphs.length;
@@ -467,7 +465,7 @@
             setTimeout(function() { self.classList.remove('glow'); }, 600);
         });
 
-        /* ═══ 7. Time values: tap → toggle 12h/24h with flip (kept animation) ═══ */
+        /* ═══ 7. Time values: tap → toggle 12h/24h with flip ═══ */
         function fmt(d, h24) {
             if (h24) return (d.getHours() < 10 ? '0' : '') + d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
             var h = d.getHours(), m = d.getMinutes(), ap = h >= 12 ? 'PM' : 'AM';
@@ -487,7 +485,7 @@
         document.getElementById('mid-time').addEventListener('click', flipFormat);
         document.getElementById('last-third-time').addEventListener('click', flipFormat);
 
-        /* ═══ 8. Countdowns: tap → simple glow (replaced pulse+scale) ═══ */
+        /* ═══ 8. Countdowns: tap → glow ═══ */
         document.querySelectorAll('.countdown').forEach(function(el) {
             el.addEventListener('click', function() {
                 this.classList.add('glow');
@@ -496,7 +494,7 @@
             });
         });
 
-        /* ═══ 9. Footer: tap → toggle info panes (kept animation) ═══ */
+        /* ═══ 9. Footer: tap → toggle info panes ═══ */
         document.getElementById('footer').addEventListener('click', function() {
             footerPane = 1 - footerPane;
             var a = document.getElementById('f-up'), b = document.getElementById('f-loc');
