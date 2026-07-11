@@ -26,7 +26,7 @@
             background-color: var(--bg); color: var(--text); 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             margin: 0; padding: 0; transition: background-color 0.3s, color 0.3s;
-            overflow: hidden; /* Handled by individual pages */
+            overflow: hidden; 
         }
 
         /* --- LAYOUT & NAVIGATION --- */
@@ -61,11 +61,6 @@
             background: var(--accent); color: #fff; border: none; 
             padding: 12px 24px; border-radius: 12px; font-weight: bold;
             cursor: pointer; font-size: 1rem; width: 100%; margin-top: 10px;
-        }
-        select { 
-            width: 100%; padding: 14px; border-radius: 12px; margin-bottom: 15px;
-            background: var(--bg); color: var(--text); border: 1px solid var(--border);
-            font-size: 1rem; outline: none; appearance: none;
         }
 
         /* --- HOME (NIGHT TIMES) --- */
@@ -131,7 +126,8 @@
 <!-- HOME PAGE -->
 <div id="page-home" class="page active">
     <h1>Night Worship</h1>
-    <h3 id="date-display" style="opacity: 0.6; font-weight: normal; margin-bottom: 30px;">Loading...</h3>
+    <h3 id="date-display" style="opacity: 0.6; font-weight: normal; margin-bottom: 10px;">Loading...</h3>
+    <p style="text-align: center; font-size: 0.85rem; opacity: 0.5; margin-bottom: 30px;">Times for Katy, Texas</p>
     
     <div class="card">
         <div style="font-size: 1rem; color: var(--accent); font-weight: bold;">Middle of the Night</div>
@@ -168,22 +164,20 @@
     </div>
 
     <!-- List View -->
-    <div id="names-list-view" class="names-grid">
-        <!-- Injected via JS -->
-    </div>
+    <div id="names-list-view" class="names-grid"></div>
 
     <!-- Flashcard View -->
     <div id="names-flashcard-view" style="display: none;">
         <div class="flashcard-container" id="fc-container">
             <div class="flashcard" onclick="this.classList.toggle('flipped')">
                 <div class="flashcard-face">
-                    <div style="font-size: 3rem; color: var(--accent);" id="fc-arabic">الرَّحْمَنُ</div>
-                    <div style="font-size: 1.5rem; margin-top: 10px;" id="fc-translit">Ar-Rahman</div>
+                    <div style="font-size: 3rem; color: var(--accent);" id="fc-arabic"></div>
+                    <div style="font-size: 1.5rem; margin-top: 10px;" id="fc-translit"></div>
                     <div style="font-size: 0.9rem; opacity: 0.6; margin-top: 20px;">Tap to flip</div>
                 </div>
                 <div class="flashcard-face flashcard-back">
-                    <h2 id="fc-translation">The Most Merciful</h2>
-                    <p id="fc-meaning" style="font-size: 0.95rem; line-height: 1.5; text-align: justify;">...</p>
+                    <h2 id="fc-translation"></h2>
+                    <p id="fc-meaning" style="font-size: 0.95rem; line-height: 1.5; text-align: justify;"></p>
                 </div>
             </div>
         </div>
@@ -197,50 +191,12 @@
 <!-- DUAS PAGE -->
 <div id="page-duas" class="page">
     <h1>Night Duas</h1>
-    <div id="duas-container">
-        <!-- Injected via JS -->
-    </div>
+    <div id="duas-container"></div>
 </div>
 
 <!-- SETTINGS PAGE -->
 <div id="page-settings" class="page">
     <h1>Settings</h1>
-    
-    <div class="card">
-        <h3>Location</h3>
-        <p style="font-size: 0.8rem; opacity: 0.7; margin-top: -10px;">Required for accurate night calculation</p>
-        <select id="location-select">
-            <option value="" disabled selected>Select a Major City...</option>
-            <optgroup label="North America">
-                <option value="New York,US">New York, USA</option>
-                <option value="Houston,US">Houston, USA</option>
-                <option value="Chicago,US">Chicago, USA</option>
-                <option value="Los Angeles,US">Los Angeles, USA</option>
-                <option value="Toronto,CA">Toronto, Canada</option>
-            </optgroup>
-            <optgroup label="Europe & UK">
-                <option value="London,UK">London, UK</option>
-                <option value="Paris,FR">Paris, France</option>
-                <option value="Berlin,DE">Berlin, Germany</option>
-            </optgroup>
-            <optgroup label="Middle East & Asia">
-                <option value="Mecca,SA">Mecca, Saudi Arabia</option>
-                <option value="Medina,SA">Medina, Saudi Arabia</option>
-                <option value="Dubai,AE">Dubai, UAE</option>
-                <option value="Istanbul,TR">Istanbul, Turkey</option>
-                <option value="Kuala Lumpur,MY">Kuala Lumpur, Malaysia</option>
-                <option value="Jakarta,ID">Jakarta, Indonesia</option>
-            </optgroup>
-            <optgroup label="Oceania & Africa">
-                <option value="Sydney,AU">Sydney, Australia</option>
-                <option value="Melbourne,AU">Melbourne, Australia</option>
-                <option value="Cairo,EG">Cairo, Egypt</option>
-                <option value="Cape Town,ZA">Cape Town, South Africa</option>
-            </optgroup>
-        </select>
-        <button class="btn" onclick="saveLocation()">Update Location</button>
-    </div>
-
     <div class="card">
         <h3>Theme</h3>
         <button class="btn" style="background: #0d1117; border: 1px solid #30363d;" onclick="setTheme('')">Dark Mode</button>
@@ -306,25 +262,111 @@
         count++; 
         countDisplay.innerText = count; 
         localStorage.setItem('dhikr', count); 
-        // Vibrate if supported
         if(navigator.vibrate) navigator.vibrate(10);
     }
     function reset() { count = 0; countDisplay.innerText = 0; localStorage.setItem('dhikr', 0); }
 
-    /* --- 99 NAMES DATA & LOGIC --- */
-    // Comprehensive sample dataset to show exact structure and deep meanings.
+    /* --- ALL 99 NAMES DATA --- */
     const namesData = [
-        { arabic: "الرَّحْمَنُ", translit: "Ar-Rahman", trans: "The Most Gracious", meaning: "The One whose mercy encompasses everything in this world. It is an active, overflowing mercy given to all creation, regardless of their belief, actions, or status." },
-        { arabic: "الرَّحِيمُ", translit: "Ar-Rahim", trans: "The Most Merciful", meaning: "The One who grants specific, continuous, and special mercy to the believers, particularly in the Hereafter. While Ar-Rahman is for all, Ar-Rahim is a tailored, intimate mercy." },
-        { arabic: "الْمَلِكُ", translit: "Al-Malik", trans: "The King and Owner of Dominion", meaning: "The absolute Sovereign, whose rule is complete. He owns everything, relies on nothing, and governs the universe with absolute authority and wisdom." },
-        { arabic: "الْقُدُّوسُ", translit: "Al-Quddus", trans: "The Absolutely Pure", meaning: "The One who is utterly free of any flaw, deficiency, or error. He is far removed from anything the imagination can conceive of as imperfect." },
-        { arabic: "السَّلَامُ", translit: "As-Salam", trans: "The Source of Peace", meaning: "The Flawless One who is the source of all peace and safety. Anyone seeking true tranquility, safety from anxiety, or spiritual peace must seek it from Him." },
-        { arabic: "الْمُؤْمِنُ", translit: "Al-Mu'min", trans: "The Guarantor of Security", meaning: "The One who grants security and peace to His creation. He verifies the truth of His prophets and fulfills His promises to His servants, offering them ultimate safety." },
-        { arabic: "الْمُهَيْمِنُ", translit: "Al-Muhaymin", trans: "The Guardian & Overseer", meaning: "The One who oversees, protects, and witnesses all things. He completely knows the affairs of His creation and ensures their preservation." },
-        { arabic: "الْعَزِيزُ", translit: "Al-Aziz", trans: "The Almighty", meaning: "The Victorious One whom no one can overcome. His dignity and power are absolute, yet His power is always perfectly balanced with His infinite wisdom." },
-        { arabic: "الْجَبَّارُ", translit: "Al-Jabbar", trans: "The Compeller / The Restorer", meaning: "The One who compels things to happen by His will. Beautifully, it also means the One who mends the brokenhearted, restores what is shattered, and binds up wounds." },
-        { arabic: "الْمُتَكَبِّرُ", translit: "Al-Mutakabbir", trans: "The Supreme / The Majestic", meaning: "The One who is truly Great and exhibits His Greatness. He is above all qualities of creation; pride and majesty belong solely to Him as their rightful owner." }
-        // Note: The rest of the 99 names can be added following this exact object structure.
+        { arabic: "الرَّحْمَنُ", translit: "Ar-Rahman", trans: "The Most Gracious", meaning: "The One whose mercy encompasses everything in this world. It is an active, overflowing mercy given to all creation." },
+        { arabic: "الرَّحِيمُ", translit: "Ar-Rahim", trans: "The Most Merciful", meaning: "The One who grants specific, continuous, and special mercy to the believers, particularly in the Hereafter." },
+        { arabic: "الْمَلِكُ", translit: "Al-Malik", trans: "The King", meaning: "The absolute Sovereign, whose rule is complete. He owns everything, relies on nothing, and governs with absolute authority." },
+        { arabic: "الْقُدُّوسُ", translit: "Al-Quddus", trans: "The Absolutely Pure", meaning: "The One who is utterly free of any flaw, deficiency, or error." },
+        { arabic: "السَّلَامُ", translit: "As-Salam", trans: "The Source of Peace", meaning: "The Flawless One who is the source of all peace and safety." },
+        { arabic: "الْمُؤْمِنُ", translit: "Al-Mu'min", trans: "The Guarantor of Security", meaning: "The One who grants security and peace to His creation and fulfills His promises." },
+        { arabic: "الْمُهَيْمِنُ", translit: "Al-Muhaymin", trans: "The Guardian", meaning: "The One who oversees, protects, and witnesses all things." },
+        { arabic: "الْعَزِيزُ", translit: "Al-Aziz", trans: "The Almighty", meaning: "The Victorious One whom no one can overcome, balancing infinite power with infinite wisdom." },
+        { arabic: "الْجَبَّارُ", translit: "Al-Jabbar", trans: "The Compeller / Restorer", meaning: "The One who compels things to happen by His will, and mends the brokenhearted." },
+        { arabic: "الْمُتَكَبِّرُ", translit: "Al-Mutakabbir", trans: "The Supreme", meaning: "The One who is truly Great and exhibits His Greatness above all creation." },
+        { arabic: "الْخَالِقُ", translit: "Al-Khaliq", trans: "The Creator", meaning: "The One who brings everything from non-existence into existence." },
+        { arabic: "الْبَارِئُ", translit: "Al-Bari", trans: "The Maker", meaning: "The One who perfectly executes the creation, producing it without any prior model." },
+        { arabic: "الْمُصَوِّرُ", translit: "Al-Musawwir", trans: "The Fashioner", meaning: "The One who forms His creatures in different pictures and features." },
+        { arabic: "الْغَفَّارُ", translit: "Al-Ghaffar", trans: "The Repeatedly Forgiving", meaning: "The One who constantly forgives and conceals the sins of His servants." },
+        { arabic: "الْقَهَّارُ", translit: "Al-Qahhar", trans: "The Subduer", meaning: "The Ever-Dominating who has perfect power and subdues all of creation." },
+        { arabic: "الْوَهَّابُ", translit: "Al-Wahhab", trans: "The Bestower", meaning: "The One who gives abundantly without expecting anything in return." },
+        { arabic: "الرَّزَّاقُ", translit: "Ar-Razzaq", trans: "The Provider", meaning: "The One who creates provision and grants it to His creatures." },
+        { arabic: "الْفَتَّاحُ", translit: "Al-Fattah", trans: "The Opener", meaning: "The One who opens the doors of mercy, profit, and sustenance." },
+        { arabic: "الْعَلِيمُ", translit: "Al-Alim", trans: "The All-Knowing", meaning: "The One whose knowledge encompasses everything, past, present, and future." },
+        { arabic: "الْقَابِضُ", translit: "Al-Qabid", trans: "The Restrainer", meaning: "The One who withholds provision and restricts souls by His wisdom." },
+        { arabic: "الْبَاسِطُ", translit: "Al-Basit", trans: "The Extender", meaning: "The One who extends and amplifies His provision and mercy." },
+        { arabic: "الْخَافِضُ", translit: "Al-Khafid", trans: "The Abaser", meaning: "The One who brings down the proud and arrogant." },
+        { arabic: "الرَّافِعُ", translit: "Ar-Rafi", trans: "The Exalter", meaning: "The One who elevates the status of the humble and righteous." },
+        { arabic: "الْمُعِزُّ", translit: "Al-Mu'izz", trans: "The Honorer", meaning: "The One who gives honor and dignity to whomever He wills." },
+        { arabic: "الْمُذِلُّ", translit: "Al-Mudhill", trans: "The Dishonorer", meaning: "The One who degrades and humbles the oppressors." },
+        { arabic: "السَّمِيعُ", translit: "As-Sami", trans: "The All-Hearing", meaning: "The One who hears everything, spoken or unspoken." },
+        { arabic: "الْبَصِيرُ", translit: "Al-Basir", trans: "The All-Seeing", meaning: "The One who sees all things, even the most hidden details." },
+        { arabic: "الْحَكَمُ", translit: "Al-Hakam", trans: "The Judge", meaning: "The Perfect Judge who delivers justice and settles all disputes." },
+        { arabic: "الْعَدْلُ", translit: "Al-Adl", trans: "The Just", meaning: "The One who is absolutely fair and equitable in all His actions." },
+        { arabic: "اللَّطِيفُ", translit: "Al-Latif", trans: "The Subtle", meaning: "The One who is kind and gentle, and aware of the finest details." },
+        { arabic: "الْخَبِيرُ", translit: "Al-Khabir", trans: "The Acquainted", meaning: "The One who knows the internal and true reality of all things." },
+        { arabic: "الْحَلِيمُ", translit: "Al-Halim", trans: "The Forbearing", meaning: "The One who is patient and does not hasten to punish." },
+        { arabic: "الْعَظِيمُ", translit: "Al-Azim", trans: "The Magnificent", meaning: "The One who is absolutely great, beyond complete human comprehension." },
+        { arabic: "الْغَفُورُ", translit: "Al-Ghafur", trans: "The Much-Forgiving", meaning: "The One who completely forgives sins, regardless of their magnitude." },
+        { arabic: "الشَّكُورُ", translit: "Ash-Shakur", trans: "The Most Appreciative", meaning: "The One who gives abundant reward for the smallest of good deeds." },
+        { arabic: "الْعَلِيُّ", translit: "Al-Ali", trans: "The Most High", meaning: "The One who is elevated and supreme above everything." },
+        { arabic: "الْكَبِيرُ", translit: "Al-Kabir", trans: "The Greatest", meaning: "The One whose essence and attributes are unimaginably great." },
+        { arabic: "الْحَفِيظُ", translit: "Al-Hafiz", trans: "The Preserver", meaning: "The One who perfectly protects and guards everything He created." },
+        { arabic: "الْمُقِيتُ", translit: "Al-Muqit", trans: "The Sustainer", meaning: "The One who nourishes and provides the exact sustenance needed." },
+        { arabic: "الْحَسِيبُ", translit: "Al-Hasib", trans: "The Reckoner", meaning: "The One who takes account of all things and is sufficient for His servants." },
+        { arabic: "الْجَلِيلُ", translit: "Al-Jalil", trans: "The Majestic", meaning: "The One who is characterized by glory, dignity, and greatness." },
+        { arabic: "الْكَرِيمُ", translit: "Al-Karim", trans: "The Generous", meaning: "The One who gives endlessly, honoring His servants beyond their merits." },
+        { arabic: "الرَّقِيبُ", translit: "Ar-Raqib", trans: "The Watchful", meaning: "The One who observes and monitors everything; nothing escapes Him." },
+        { arabic: "الْمُجِيبُ", translit: "Al-Mujib", trans: "The Responsive", meaning: "The One who answers the prayers and pleas of those who call upon Him." },
+        { arabic: "الْوَاسِعُ", translit: "Al-Wasi", trans: "The All-Encompassing", meaning: "The One whose mercy, knowledge, and provision cover all things." },
+        { arabic: "الْحَكِيمُ", translit: "Al-Hakim", trans: "The Wise", meaning: "The One whose actions are perfectly correct, purposeful, and profoundly wise." },
+        { arabic: "الْوَدُودُ", translit: "Al-Wadud", trans: "The Loving", meaning: "The One who loves His believing servants and is deeply loved by them." },
+        { arabic: "الْمَجِيدُ", translit: "Al-Majid", trans: "The Glorious", meaning: "The One whose majesty and abundant goodness are celebrated." },
+        { arabic: "الْبَاعِثُ", translit: "Al-Ba'ith", trans: "The Resurrecter", meaning: "The One who awakens the dead and brings them back to life." },
+        { arabic: "الشَّهِيدُ", translit: "Ash-Shahid", trans: "The Witness", meaning: "The One who is present in all places, witnessing all that happens." },
+        { arabic: "الْحَقُّ", translit: "Al-Haqq", trans: "The Truth", meaning: "The One whose existence is the absolute, unchangeable reality." },
+        { arabic: "الْوَكِيلُ", translit: "Al-Wakil", trans: "The Trustee", meaning: "The Ultimate Disposer of Affairs, in whom one should place their trust." },
+        { arabic: "الْقَوِيُّ", translit: "Al-Qawiyy", trans: "The Strong", meaning: "The One possessing absolute strength; nothing can overpower Him." },
+        { arabic: "الْمَتِينُ", translit: "Al-Matin", trans: "The Firm", meaning: "The One whose strength is unshakeable and perfectly steadfast." },
+        { arabic: "الْوَلِيُّ", translit: "Al-Waliyy", trans: "The Protecting Friend", meaning: "The Supporter and Ally of those who believe and do good." },
+        { arabic: "الْحَمِيدُ", translit: "Al-Hamid", trans: "The Praiseworthy", meaning: "The One who is inherently deserving of all praise and gratitude." },
+        { arabic: "الْمُحْصِي", translit: "Al-Muhsi", trans: "The Accounter", meaning: "The One who knows the exact number of all things, missing nothing." },
+        { arabic: "الْمُبْدِئُ", translit: "Al-Mubdi", trans: "The Originator", meaning: "The One who creates everything from nothing, initiating all existence." },
+        { arabic: "الْمُعِيدُ", translit: "Al-Mu'id", trans: "The Restorer", meaning: "The One who brings things back into existence after death." },
+        { arabic: "الْمُحْيِي", translit: "Al-Muhyi", trans: "The Giver of Life", meaning: "The One who grants life and revives what is dead." },
+        { arabic: "الْمُمِيتُ", translit: "Al-Mumit", trans: "The Bringer of Death", meaning: "The One who causes death, calling souls back to Himself." },
+        { arabic: "الْحَيُّ", translit: "Al-Hayy", trans: "The Ever-Living", meaning: "The One who is perfectly alive, with a life that has no beginning or end." },
+        { arabic: "الْقَيُّومُ", translit: "Al-Qayyum", trans: "The Sustainer of All", meaning: "The Self-Sustaining One upon whom everything else relies to exist." },
+        { arabic: "الْوَاجِدُ", translit: "Al-Wajid", trans: "The Finder", meaning: "The One who has no needs and lacks nothing; He finds whatever He wills." },
+        { arabic: "الْمَاجِدُ", translit: "Al-Majid", trans: "The Noble", meaning: "The One whose nobility and magnificence are unmatched." },
+        { arabic: "الْوَاحِدُ", translit: "Al-Wahid", trans: "The Unique", meaning: "The One who is entirely unique and undivided in His essence." },
+        { arabic: "الْأَحَدُ", translit: "Al-Ahad", trans: "The One", meaning: "The Indivisible, the absolutely singular One with no equivalent." },
+        { arabic: "الصَّمَدُ", translit: "As-Samad", trans: "The Eternal Refuge", meaning: "The Ultimate Master whom all creatures need, yet He needs no one." },
+        { arabic: "الْقَادِرُ", translit: "Al-Qadir", trans: "The Capable", meaning: "The One who has the complete power and ability to do whatever He wills." },
+        { arabic: "الْمُقْتَدِرُ", translit: "Al-Muqtadir", trans: "The Powerful", meaning: "The One who creates all power and has supreme control over it." },
+        { arabic: "الْمُقَدِّمُ", translit: "Al-Muqaddim", trans: "The Expediter", meaning: "The One who brings things forward and grants them precedence." },
+        { arabic: "الْمُؤَخِّرُ", translit: "Al-Mu'akhkhir", trans: "The Delayer", meaning: "The One who delays or holds back what He wills by His wisdom." },
+        { arabic: "الْأَوَّلُ", translit: "Al-Awwal", trans: "The First", meaning: "The One whose existence has no beginning; He precedes all." },
+        { arabic: "الْآخِرُ", translit: "Al-Akhir", trans: "The Last", meaning: "The One who remains after everything else has perished." },
+        { arabic: "الظَّاهِرُ", translit: "Az-Zahir", trans: "The Manifest", meaning: "The One whose existence is evident through all of His creation." },
+        { arabic: "الْبَاطِنُ", translit: "Al-Batin", trans: "The Hidden", meaning: "The One who is unseen in this world yet infinitely near in reality." },
+        { arabic: "الْوَالِي", translit: "Al-Wali", trans: "The Governor", meaning: "The One who manages, directs, and administers all affairs." },
+        { arabic: "الْمُتَعَالِي", translit: "Al-Muta'ali", trans: "The Supremely Exalted", meaning: "The One who is exalted high above any flaw or human attribute." },
+        { arabic: "الْبَرُّ", translit: "Al-Barr", trans: "The Source of Goodness", meaning: "The One who is gentle, kind, and abundantly giving to His creation." },
+        { arabic: "التَّوَّابُ", translit: "At-Tawwab", trans: "The Accepter of Repentance", meaning: "The One who continuously turns to those who seek His forgiveness." },
+        { arabic: "الْمُنْتَقِمُ", translit: "Al-Muntaqim", trans: "The Avenger", meaning: "The One who exacts retribution on oppressors to establish justice." },
+        { arabic: "الْعَفُوُّ", translit: "Al-Afuww", trans: "The Pardoner", meaning: "The One who completely erases sins as if they never occurred." },
+        { arabic: "الرَّءُوفُ", translit: "Ar-Ra'uf", trans: "The Compassionate", meaning: "The One who possesses ultimate pity and intense tenderness." },
+        { arabic: "مَالِكُ الْمُلْكِ", translit: "Malik-ul-Mulk", trans: "Master of the Kingdom", meaning: "The true Owner of all sovereignty, dispensing it as He wills." },
+        { arabic: "ذُو الْجَلَالِ وَالْإِكْرَامِ", translit: "Dhu-l-Jalal wal-Ikram", trans: "Lord of Majesty and Bounty", meaning: "The One who is inherently Majestic and continuously gives generously." },
+        { arabic: "الْمُقْسِطُ", translit: "Al-Muqsit", trans: "The Equitable", meaning: "The One who acts with absolute fairness and establishes justice." },
+        { arabic: "الْجَامِعُ", translit: "Al-Jami", trans: "The Gatherer", meaning: "The One who gathers people together on the Day of Judgment." },
+        { arabic: "الْغَنِيُّ", translit: "Al-Ghani", trans: "The Self-Sufficient", meaning: "The One who is absolutely independent and free from all needs." },
+        { arabic: "الْمُغْنِي", translit: "Al-Mughni", trans: "The Enricher", meaning: "The One who grants wealth and satisfies the needs of His creatures." },
+        { arabic: "الْمَانِعُ", translit: "Al-Mani", trans: "The Preventer", meaning: "The One who protects and shields His servants by preventing harm." },
+        { arabic: "الضَّارُّ", translit: "Ad-Darr", trans: "The Creator of Harm", meaning: "The One who creates scenarios of difficulty to test or purify." },
+        { arabic: "النَّافِعُ", translit: "An-Nafi", trans: "The Creator of Good", meaning: "The One who confers benefits and allows goodness to reach His creation." },
+        { arabic: "النُّورُ", translit: "An-Nur", trans: "The Light", meaning: "The One who illuminates the heavens and the earth, and guides hearts." },
+        { arabic: "الْهَادِي", translit: "Al-Hadi", trans: "The Guide", meaning: "The One who directs people towards the truth and right path." },
+        { arabic: "الْبَدِيعُ", translit: "Al-Badi", trans: "The Incomparable Originator", meaning: "The One who creates beautifully without any previous blueprint." },
+        { arabic: "الْبَاقِي", translit: "Al-Baqi", trans: "The Everlasting", meaning: "The One whose existence is permanent, without end." },
+        { arabic: "الْوَارِثُ", translit: "Al-Warith", trans: "The Inheritor", meaning: "The One to whom all possessions return after their temporary owners vanish." },
+        { arabic: "الرَّشِيدُ", translit: "Ar-Rashid", trans: "The Righteous Teacher", meaning: "The One who infallibly guides to the best and most appropriate path." },
+        { arabic: "الصَّبُورُ", translit: "As-Sabur", trans: "The Patient", meaning: "The One who is flawlessly patient, neither rushing punishment nor losing composure." }
     ];
 
     let currentCardIndex = 0;
@@ -338,6 +380,7 @@
                 <div style="font-size:0.8rem; opacity:0.7">${n.trans}</div>
             </div>
         `).join('');
+        updateFlashcard();
     }
 
     function openNameModal(index) {
@@ -363,16 +406,17 @@
     }
 
     function updateFlashcard() {
+        if(namesData.length === 0) return;
         const n = namesData[currentCardIndex];
         const fc = document.querySelector('.flashcard');
-        fc.classList.remove('flipped'); // Reset flip state
+        fc.classList.remove('flipped'); 
         
         setTimeout(() => {
             document.getElementById('fc-arabic').innerText = n.arabic;
             document.getElementById('fc-translit').innerText = n.translit;
             document.getElementById('fc-translation').innerText = n.trans;
             document.getElementById('fc-meaning').innerText = n.meaning;
-        }, 150); // wait for flip animation before swapping text
+        }, 150); 
     }
 
     function nextCard() { currentCardIndex = (currentCardIndex + 1) % namesData.length; updateFlashcard(); }
@@ -395,7 +439,7 @@
             trans: "O Allah, I ask You for Your love, and the love of whoever loves You, and the love of deeds that will bring me to Your love."
         },
         {
-            title: "Sayyid al-Istighfar (The Master of Seeking Forgiveness)",
+            title: "Sayyid al-Istighfar (Master of Forgiveness)",
             arabicUthmani: "اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ لَكَ بِذَنْبِي فَاغْفِرْ لِي، فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ",
             arabicIndopak: "اَللّٰهُمَّ اَنْتَ رَبِّیْ لَا اِلٰهَ اِلَّا اَنْتَ، خَلَقْتَنِیْ وَاَنَا عَبْدُكَ، وَاَنَا عَلٰی عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، اَعُوْذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، اَبُوْءُ لَكَ بِنِعْمَتِكَ عَلَیَّ، وَاَبُوْءُ لَكَ بِذَنْبِیْ فَاغْفِرْ لِیْ، فَاِنَّهٗ لَا يَغْفِرُ الذُّنُوْبَ اِلَّا اَنْتَ",
             translit: "Allahumma anta Rabbi la ilaha illa anta, khalaqtani wa ana 'abduka, wa ana 'ala 'ahdika wa wa'dika mastata'tu, a'udhu bika min sharri ma sana'tu, abu'u laka bini'matika 'alayya, wa abu'u laka bidhanbi faghfir li, fa innahu la yaghfirud-dhunuba illa anta.",
@@ -421,15 +465,6 @@
     /* --- TIMING & API LOGIC --- */
     let timerInterval;
 
-    function saveLocation() {
-        const val = document.getElementById('location-select').value;
-        if(val) {
-            localStorage.setItem('savedLocation', val);
-            alert("Location updated successfully!");
-            initApp();
-        }
-    }
-
     function calculateNightTimes(maghribStr, fajrStr) {
         const now = new Date();
         const maghrib = new Date();
@@ -440,11 +475,9 @@
         const [fH, fM] = fajrStr.split(':');
         fajr.setHours(fH, fM, 0);
         
-        // If it's currently past midnight, Maghrib was yesterday
         if (now.getHours() < parseInt(fH)) {
             maghrib.setDate(maghrib.getDate() - 1);
         } else {
-            // Otherwise, Fajr is tomorrow
             fajr.setDate(fajr.getDate() + 1);
         }
 
@@ -487,18 +520,11 @@
         renderNamesList();
         renderDuas();
 
-        const loc = localStorage.getItem('savedLocation');
-        if(loc) {
-            document.getElementById('location-select').value = loc;
-        } else {
-            document.getElementById('date-display').innerText = "Please go to Settings to select your city.";
-            return;
-        }
-
         document.getElementById('date-display').innerText = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
 
         try {
-            const res = await fetch(`https://api.aladhan.com/v1/timingsByAddress?address=${loc}&method=2`);
+            // Hardcoded to Katy, Texas
+            const res = await fetch(`https://api.aladhan.com/v1/timingsByAddress?address=Katy,Texas,USA&method=2`);
             const data = await res.json();
             const timings = data.data.timings;
             
@@ -513,7 +539,6 @@
         }
     }
 
-    // Initialize
     initApp();
 
 </script>
