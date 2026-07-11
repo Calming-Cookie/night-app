@@ -9,7 +9,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Night Times">
     <meta name="theme-color" content="#0d1117">
-    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cdefs%3E%3ClinearGradient id='b' x1='0' y1='0' x2='180' y2='180' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%230d1b2a'/%3E%3Cstop offset='1' stop-color='%231b2d45'/%3E%3C/linearGradient%3E%3CradialGradient id='g' cx='96' cy='80' r='52'%3E%3Cstop offset='0' stop-color='%23e8dcc8' stop-opacity='.28'/%3E%3Cstop offset='1' stop-color='%23e8dcc8' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='180' height='180' rx='40' fill='url(%23b)'/%3E%3Ccircle cx='96' cy='80' r='52' fill='url(%23g)'/%3E%3Cpath d='M103 36A44 44 0 1 0 103 128A33 33 0 1 1 103 36Z' fill='%23e8dcc8'/%3E%3Ccircle cx='46' cy='46' r='2.5' fill='%23fff' opacity='.9'/%3E%3Ccircle cx='144' cy='56' r='2' fill='%23fff' opacity='.7'/%3E%3Ccircle cx='40' cy='118' r='2' fill='%23fff' opacity='.6'/%3E%3Ccircle cx='140' cy='128' r='2.5' fill='%23fff' opacity='.8'/%3E%3Ccircle cx='56' cy='148' r='1.5' fill='%23fff' opacity='.5'/%3E%3Ccircle cx='137' cy='36' r='1.5' fill='%23fff' opacity='.65'/%3E%3Ccircle cx='68' cy='32' r='1' fill='%23fff' opacity='.4'/%3E%3Ccircle cx='152' cy='96' r='1' fill='%23fff' opacity='.45'/%3E%3C/svg%3E">
     <style>
         :root {
             --bg: #0d1117;
@@ -22,6 +21,7 @@
             --accent-glow: rgba(88,166,255,0.55);
             --shadow: rgba(0,0,0,0.2);
             --btn-fg: #0d1117;
+            --particle: rgba(88,166,255,0.12);
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         html, body {
@@ -41,6 +41,13 @@
             margin: 0;
             text-align: center;
             touch-action: none;
+        }
+        #particles {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
         }
         h1 {
             color: var(--accent);
@@ -119,7 +126,6 @@
             font-size: 1.2rem;
             color: var(--accent);
             font-weight: bold;
-            margin-bottom: 25px;
             font-variant-numeric: tabular-nums;
             cursor: pointer;
             user-select: none;
@@ -127,6 +133,12 @@
             transition: text-shadow 0.2s ease;
         }
         .countdown.glow { text-shadow: 0 0 16px var(--accent-glow), 0 0 32px var(--accent-glow); }
+        .card-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 22px 0 24px 0;
+            opacity: 0.5;
+        }
         .footer {
             margin-top: 20px;
             font-size: 0.9rem;
@@ -166,10 +178,8 @@
             will-change: transform, opacity;
         }
         .sparkle.trail {
-            width: 14px;
-            height: 14px;
             border-radius: 50%;
-            animation: trailUp 1.8s ease-out forwards;
+            animation: trailUp 1.6s ease-out forwards;
         }
         .sparkle.tap {
             font-size: 11px;
@@ -177,7 +187,7 @@
         }
         @keyframes trailUp {
             0%   { opacity: 0.7; transform: translateY(0) translateX(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-60px) translateX(var(--dx, 0px)) scale(0.08); }
+            100% { opacity: 0; transform: translateY(-55px) translateX(var(--dx, 0px)) scale(0.05); }
         }
         @keyframes drift {
             0%   { opacity: 0; transform: translateY(0) scale(0.2); }
@@ -214,7 +224,7 @@
             z-index: 200;
             display: none;
             flex-direction: row;
-            gap: 10px;
+            gap: 9px;
             box-shadow: 0 6px 24px var(--shadow);
             transform-origin: bottom right;
         }
@@ -230,12 +240,15 @@
             cursor: pointer;
             border: 2.5px solid transparent;
             transition: transform 0.18s cubic-bezier(.34,1.56,.64,1), border-color 0.2s ease;
+            flex-shrink: 0;
         }
         .tdot:hover, .tdot:active { transform: scale(1.25); }
         .tdot.active { border-color: var(--text-bright); transform: scale(1.1); }
     </style>
 </head>
 <body>
+
+    <canvas id="particles"></canvas>
 
     <h1 id="title">Night Worship</h1>
     <h2 id="date-display">Loading...</h2>
@@ -244,6 +257,8 @@
         <div class="time-label" id="mid-label">🌙 Middle of the Night</div>
         <div class="time-value" id="mid-time">--:--</div>
         <div class="countdown" id="mid-countdown">--:--:--</div>
+
+        <div class="card-divider"></div>
 
         <div class="time-label" id="lt-label">✨ Last Third Begins</div>
         <div class="time-value" id="last-third-time">--:--</div>
@@ -257,6 +272,7 @@
 
     <div id="tbtn"><span>◐</span></div>
     <div id="tpanel">
+        <div class="tdot" data-t="black" style="background:#1a1a1a;border-color:#333"></div>
         <div class="tdot active" data-t="midnight" style="background:#58a6ff"></div>
         <div class="tdot" data-t="cream" style="background:#c49a2a"></div>
         <div class="tdot" data-t="forest" style="background:#4ade80"></div>
@@ -265,45 +281,165 @@
     </div>
 
     <script>
+        /* ═══════════ Ambient particles ═══════════ */
+        var cvs = document.getElementById('particles');
+        var ctx = cvs.getContext('2d');
+        var pColor = { r: 88, g: 166, b: 255 };
+        var pTarget = { r: 88, g: 166, b: 255 };
+        var dots = [];
+        var DOT_COUNT = 32;
+
+        function sizeCanvas() {
+            cvs.width = window.innerWidth;
+            cvs.height = window.innerHeight;
+        }
+        sizeCanvas();
+        window.addEventListener('resize', sizeCanvas);
+
+        function makeDot() {
+            return {
+                x: Math.random() * cvs.width,
+                y: Math.random() * cvs.height,
+                r: 1 + Math.random() * 2.2,
+                vy: -(0.08 + Math.random() * 0.18),
+                vx: (Math.random() - 0.5) * 0.12,
+                phase: Math.random() * Math.PI * 2,
+                speed: 0.003 + Math.random() * 0.006,
+                baseAlpha: 0.08 + Math.random() * 0.18
+            };
+        }
+        for (var i = 0; i < DOT_COUNT; i++) dots.push(makeDot());
+
+        function lerpColor() {
+            pColor.r += (pTarget.r - pColor.r) * 0.02;
+            pColor.g += (pTarget.g - pColor.g) * 0.02;
+            pColor.b += (pTarget.b - pColor.b) * 0.02;
+        }
+
+        function drawParticles() {
+            ctx.clearRect(0, 0, cvs.width, cvs.height);
+            lerpColor();
+            var cr = Math.round(pColor.r), cg = Math.round(pColor.g), cb = Math.round(pColor.b);
+            for (var i = 0; i < dots.length; i++) {
+                var d = dots[i];
+                d.phase += d.speed;
+                d.x += d.vx + Math.sin(d.phase) * 0.15;
+                d.y += d.vy;
+                if (d.y < -10) { d.y = cvs.height + 10; d.x = Math.random() * cvs.width; }
+                if (d.x < -10) d.x = cvs.width + 10;
+                if (d.x > cvs.width + 10) d.x = -10;
+                var a = d.baseAlpha * (0.5 + 0.5 * Math.sin(d.phase * 1.3));
+                ctx.beginPath();
+                ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(' + cr + ',' + cg + ',' + cb + ',' + a.toFixed(3) + ')';
+                ctx.fill();
+            }
+            requestAnimationFrame(drawParticles);
+        }
+        drawParticles();
+
+        function setParticleColor(r, g, b) { pTarget = { r: r, g: g, b: b }; }
+
+        /* ═══════════ Generate app icon ═══════════ */
+        function drawStar(ctx, cx, cy, spikes, oR, iR) {
+            var rot = -Math.PI / 2, step = Math.PI / spikes;
+            ctx.beginPath();
+            for (var i = 0; i < spikes; i++) {
+                ctx.lineTo(cx + Math.cos(rot) * oR, cy + Math.sin(rot) * oR); rot += step;
+                ctx.lineTo(cx + Math.cos(rot) * iR, cy + Math.sin(rot) * iR); rot += step;
+            }
+            ctx.closePath(); ctx.fill();
+        }
+        function generateIcon() {
+            var s = 180, c = document.createElement('canvas');
+            c.width = s; c.height = s;
+            var x = c.getContext('2d');
+            var r = 38;
+            x.beginPath();
+            x.moveTo(r, 0); x.lineTo(s - r, 0);
+            x.quadraticCurveTo(s, 0, s, r); x.lineTo(s, s - r);
+            x.quadraticCurveTo(s, s, s - r, s); x.lineTo(r, s);
+            x.quadraticCurveTo(0, s, 0, s - r); x.lineTo(0, r);
+            x.quadraticCurveTo(0, 0, r, 0);
+            x.closePath();
+            x.fillStyle = '#0d1117'; x.fill();
+            x.strokeStyle = '#21262d'; x.lineWidth = 2; x.stroke();
+            x.fillStyle = '#58a6ff';
+            x.beginPath(); x.arc(76, 78, 34, 0, Math.PI * 2); x.fill();
+            x.fillStyle = '#0d1117';
+            x.beginPath(); x.arc(94, 70, 28, 0, Math.PI * 2); x.fill();
+            x.fillStyle = '#58a6ff';
+            drawStar(x, 124, 50, 4, 7, 3);
+            drawStar(x, 108, 108, 4, 5.5, 2.3);
+            drawStar(x, 140, 78, 4, 4.5, 1.8);
+            x.fillStyle = 'rgba(88,166,255,0.5)';
+            drawStar(x, 55, 118, 4, 3.5, 1.4);
+            drawStar(x, 130, 118, 4, 3, 1.2);
+            x.font = '600 22px -apple-system, BlinkMacSystemFont, sans-serif';
+            x.fillStyle = '#8b949e';
+            x.textAlign = 'center'; x.textBaseline = 'middle';
+            x.fillText('NW', 90, 152);
+            var url = c.toDataURL('image/png');
+            var a = document.createElement('link'); a.rel = 'apple-touch-icon'; a.href = url; document.head.appendChild(a);
+            var f = document.createElement('link'); f.rel = 'icon'; f.type = 'image/png'; f.href = url; document.head.appendChild(f);
+        }
+        generateIcon();
+
         /* ═══════════ Themes ═══════════ */
         var themes = {
+            black: {
+                '--bg':'#000000','--card-bg':'#0a0a0a','--border':'#1a1a1a',
+                '--text':'#888888','--text-bright':'#c8c8c8','--text-muted':'#4a4a4a',
+                '--accent':'#6688aa','--accent-glow':'rgba(102,136,170,0.35)',
+                '--shadow':'rgba(0,0,0,0.5)','--btn-fg':'#000000',
+                pc: [102, 136, 170]
+            },
             midnight: {
                 '--bg':'#0d1117','--card-bg':'#161b22','--border':'#30363d',
                 '--text':'#c9d1d9','--text-bright':'#e6edf3','--text-muted':'#8b949e',
                 '--accent':'#58a6ff','--accent-glow':'rgba(88,166,255,0.55)',
-                '--shadow':'rgba(0,0,0,0.2)','--btn-fg':'#0d1117'
+                '--shadow':'rgba(0,0,0,0.2)','--btn-fg':'#0d1117',
+                pc: [88, 166, 255]
             },
             cream: {
                 '--bg':'#f3ede2','--card-bg':'#e9e2d3','--border':'#d0c5b0',
                 '--text':'#4a4035','--text-bright':'#2a2218','--text-muted':'#8a7d6c',
                 '--accent':'#a67c00','--accent-glow':'rgba(166,124,0,0.35)',
-                '--shadow':'rgba(60,45,20,0.09)','--btn-fg':'#fff'
+                '--shadow':'rgba(60,45,20,0.09)','--btn-fg':'#fff',
+                pc: [166, 124, 0]
             },
             forest: {
                 '--bg':'#0b1810','--card-bg':'#12201a','--border':'#244030',
                 '--text':'#b5cbbd','--text-bright':'#d6e9dc','--text-muted':'#688a72',
                 '--accent':'#4ade80','--accent-glow':'rgba(74,222,128,0.4)',
-                '--shadow':'rgba(0,0,0,0.3)','--btn-fg':'#0b1810'
+                '--shadow':'rgba(0,0,0,0.3)','--btn-fg':'#0b1810',
+                pc: [74, 222, 128]
             },
             dusk: {
                 '--bg':'#15122a','--card-bg':'#1d1938','--border':'#332c5a',
                 '--text':'#c2bbde','--text-bright':'#ddd8f0','--text-muted':'#787098',
                 '--accent':'#a78bfa','--accent-glow':'rgba(167,139,250,0.4)',
-                '--shadow':'rgba(0,0,0,0.3)','--btn-fg':'#15122a'
+                '--shadow':'rgba(0,0,0,0.3)','--btn-fg':'#15122a',
+                pc: [167, 139, 250]
             },
             ember: {
                 '--bg':'#1a0f0b','--card-bg':'#261913','--border':'#3d281c',
                 '--text':'#d3bbae','--text-bright':'#e9d6cc','--text-muted':'#896e5e',
                 '--accent':'#f59e42','--accent-glow':'rgba(245,158,66,0.4)',
-                '--shadow':'rgba(0,0,0,0.3)','--btn-fg':'#1a0f0b'
+                '--shadow':'rgba(0,0,0,0.3)','--btn-fg':'#1a0f0b',
+                pc: [245, 158, 66]
             }
         };
 
         function setTheme(name) {
             var v = themes[name]; if (!v) return;
             var r = document.documentElement;
-            for (var k in v) r.style.setProperty(k, v[k]);
+            for (var k in v) {
+                if (k === 'pc') continue;
+                r.style.setProperty(k, v[k]);
+            }
             document.querySelector('meta[name="theme-color"]').content = v['--bg'];
+            setParticleColor(v.pc[0], v.pc[1], v.pc[2]);
             document.querySelectorAll('.tdot').forEach(function(d) {
                 d.classList.toggle('active', d.dataset.t === name);
             });
@@ -344,64 +480,62 @@
         function accentColor() {
             return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
         }
-
-        function spawnTrail(x, y) {
+        function spawnTrailDot(x, y) {
             var el = document.createElement('div');
             el.className = 'sparkle trail';
-            el.style.left = (x - 7) + 'px';
-            el.style.top  = (y - 7) + 'px';
+            var size = 4 + Math.random() * 7;
+            el.style.width = size + 'px'; el.style.height = size + 'px';
+            el.style.left = (x - size / 2 + (Math.random() - 0.5) * 16) + 'px';
+            el.style.top  = (y - size / 2 + (Math.random() - 0.5) * 16) + 'px';
             el.style.background = accentColor();
-            el.style.boxShadow = '0 0 12px ' + accentColor() + ', 0 0 24px ' + accentColor();
-            el.style.setProperty('--dx', ((Math.random() - 0.5) * 30) + 'px');
+            el.style.boxShadow = '0 0 ' + (4 + Math.random() * 6) + 'px ' + accentColor();
+            el.style.setProperty('--dx', ((Math.random() - 0.5) * 36) + 'px');
             document.body.appendChild(el);
-            setTimeout(function() { el.remove(); }, 1900);
+            setTimeout(function() { el.remove(); }, 1700);
         }
-
+        function spawnTrailBurst(x, y) {
+            var count = 4 + Math.floor(Math.random() * 3);
+            for (var i = 0; i < count; i++) {
+                (function(d) { setTimeout(function() { spawnTrailDot(x, y); }, d); })(i * 25);
+            }
+        }
         function spawnTapCluster(x, y) {
-            var glyphs = ['·','✦','⋆','✧','·'];
-            for (var i = 0; i < 4; i++) {
+            var glyphs = ['·','✦','⋆','✧','·','✦'];
+            for (var i = 0; i < 5; i++) {
                 (function(delay) {
                     setTimeout(function() {
                         var el = document.createElement('div');
                         el.className = 'sparkle tap';
                         el.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
-                        el.style.left = (x + (Math.random() - 0.5) * 40 - 5) + 'px';
-                        el.style.top  = (y + (Math.random() - 0.5) * 30 - 5) + 'px';
+                        el.style.left = (x + (Math.random() - 0.5) * 48 - 5) + 'px';
+                        el.style.top  = (y + (Math.random() - 0.5) * 36 - 5) + 'px';
                         el.style.color = accentColor();
-                        el.style.setProperty('--dx', ((Math.random() - 0.5) * 28) + 'px');
+                        el.style.setProperty('--dx', ((Math.random() - 0.5) * 32) + 'px');
                         document.body.appendChild(el);
                         setTimeout(function() { el.remove(); }, 2700);
                     }, delay);
-                })(i * 45);
+                })(i * 40);
             }
         }
 
-        /* ═══════════ Touch trail on body ═══════════ */
-        var lastTrailTime = 0;
-        var isTrailing = false;
-
+        /* ═══════════ Touch trail ═══════════ */
+        var lastTrailTime = 0, isTrailing = false;
         document.body.addEventListener('touchstart', function(e) {
             if (e.target !== document.body) return;
             isTrailing = true;
-            var t = e.touches[0];
-            spawnTapCluster(t.clientX, t.clientY);
+            spawnTapCluster(e.touches[0].clientX, e.touches[0].clientY);
         }, { passive: true });
-
         document.body.addEventListener('touchmove', function(e) {
             e.preventDefault();
             if (!isTrailing) return;
             var now = Date.now();
             if (now - lastTrailTime < 25) return;
             lastTrailTime = now;
-            var t = e.touches[0];
-            spawnTrail(t.clientX, t.clientY);
+            spawnTrailBurst(e.touches[0].clientX, e.touches[0].clientY);
         }, { passive: false });
-
         document.body.addEventListener('touchend', function() { isTrailing = false; }, { passive: true });
 
-        /* Mouse drag trail on empty background */
-        var mouseDown = false;
-        var lastMouseTrail = 0;
+        var mouseDown = false, lastMouseTrail = 0;
         document.body.addEventListener('mousedown', function(e) {
             if (e.target !== document.body) return;
             mouseDown = true;
@@ -412,7 +546,7 @@
             var now = Date.now();
             if (now - lastMouseTrail < 25) return;
             lastMouseTrail = now;
-            spawnTrail(e.clientX, e.clientY);
+            spawnTrailBurst(e.clientX, e.clientY);
         });
         document.body.addEventListener('mouseup', function() { mouseDown = false; });
 
@@ -424,7 +558,7 @@
             setTimeout(function() { self.classList.remove('glow'); }, 700);
         });
 
-        /* ═══ 3. Date: tap → cycle full / gregorian / hijri ═══ */
+        /* ═══ 3. Date: tap → cycle ═══ */
         var dateEl = document.getElementById('date-display');
         dateEl.addEventListener('click', function() {
             dateMode = (dateMode + 1) % 3;
@@ -447,7 +581,7 @@
             setTimeout(function() { self.classList.remove('glow'); }, 900);
         });
 
-        /* ═══ 5. Moon label: tap → cycle phase emoji + pop ═══ */
+        /* ═══ 5. Moon label: tap → cycle + pop ═══ */
         var midLabel = document.getElementById('mid-label');
         midLabel.addEventListener('click', function() {
             mi = (mi + 1) % moons.length;
@@ -455,7 +589,7 @@
             this.classList.remove('pop'); void this.offsetWidth; this.classList.add('pop');
         });
 
-        /* ═══ 6. Star label: tap → cycle + glow ═══ */
+        /* ═══ 6. Star label: tap → glow ═══ */
         var ltLabel = document.getElementById('lt-label');
         ltLabel.addEventListener('click', function() {
             si = (si + 1) % starGlyphs.length;
@@ -465,7 +599,7 @@
             setTimeout(function() { self.classList.remove('glow'); }, 600);
         });
 
-        /* ═══ 7. Time values: tap → toggle 12h/24h with flip ═══ */
+        /* ═══ 7. Time values: tap → toggle 12h/24h ═══ */
         function fmt(d, h24) {
             if (h24) return (d.getHours() < 10 ? '0' : '') + d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
             var h = d.getHours(), m = d.getMinutes(), ap = h >= 12 ? 'PM' : 'AM';
@@ -494,7 +628,7 @@
             });
         });
 
-        /* ═══ 9. Footer: tap → toggle info panes ═══ */
+        /* ═══ 9. Footer: tap → toggle ═══ */
         document.getElementById('footer').addEventListener('click', function() {
             footerPane = 1 - footerPane;
             var a = document.getElementById('f-up'), b = document.getElementById('f-loc');
@@ -502,61 +636,46 @@
             b.className = 'fp ' + (footerPane === 1 ? 'on' : 'off');
         });
 
-        /* ════════════════ Original app logic ════════════════ */
+        /* ════════════════ App logic ════════════════ */
         async function fetchTimes() {
             var city = "Katy", state = "Texas", country = "US";
             var now = new Date();
-
             var baseDate = new Date(now);
             if (baseDate.getHours() < 5) baseDate.setDate(baseDate.getDate() - 1);
-
             var nextDay = new Date(baseDate);
             nextDay.setDate(baseDate.getDate() + 1);
-
             var d1Str = baseDate.getDate() + '-' + (baseDate.getMonth() + 1) + '-' + baseDate.getFullYear();
             var d2Str = nextDay.getDate() + '-' + (nextDay.getMonth() + 1) + '-' + nextDay.getFullYear();
-
             var url1 = 'https://api.aladhan.com/v1/timingsByCity/' + d1Str + '?city=' + city + '&state=' + state + '&country=' + country + '&method=2';
             var url2 = 'https://api.aladhan.com/v1/timingsByCity/' + d2Str + '?city=' + city + '&state=' + state + '&country=' + country + '&method=2';
-
             try {
                 var res = await Promise.all([
                     fetch(url1).then(function(r) { return r.json(); }),
                     fetch(url2).then(function(r) { return r.json(); })
                 ]);
-
                 var mp = res[0].data.timings.Maghrib.split(":");
                 var maghribDate = new Date(baseDate);
                 maghribDate.setHours(parseInt(mp[0]), parseInt(mp[1]), 0, 0);
-
                 var fp = res[1].data.timings.Fajr.split(":");
                 var fajrDate = new Date(nextDay);
                 fajrDate.setHours(parseInt(fp[0]), parseInt(fp[1]), 0, 0);
-
                 var dur = fajrDate.getTime() - maghribDate.getTime();
                 midDate = new Date(maghribDate.getTime() + dur / 2);
                 lastThirdDate = new Date(maghribDate.getTime() + dur * (2 / 3));
-
                 nextUpdateDate = new Date(now);
                 if (nextUpdateDate.getHours() >= 5) nextUpdateDate.setDate(nextUpdateDate.getDate() + 1);
                 nextUpdateDate.setHours(5, 0, 0, 0);
-
                 document.getElementById('mid-time').innerText = fmt(midDate, false);
                 document.getElementById('last-third-time').innerText = fmt(lastThirdDate, false);
-
                 var g1 = res[0].data.date.gregorian;
                 var g2 = res[1].data.date.gregorian;
                 var hj = res[0].data.date.hijri;
-
                 var ds = g1.month.en + ' ' + g1.day + '/' + g2.day;
                 if (g1.month.en !== g2.month.en) ds = g1.month.en + ' ' + g1.day + ' / ' + g2.month.en + ' ' + g2.day;
-
                 fullDateStr = g1.weekday.en + ', ' + ds + ' | ' + hj.day + ' ' + hj.month.en + ' ' + hj.year;
                 document.getElementById('date-display').innerText = fullDateStr;
-
                 setInterval(updateCountdowns, 1000);
                 updateCountdowns();
-
             } catch (error) {
                 document.getElementById('date-display').innerText = "Error loading times. Check internet.";
             }
@@ -564,7 +683,6 @@
 
         function updateCountdowns() {
             var now = new Date().getTime();
-
             function diff(t) {
                 var d = t.getTime() - now;
                 if (d <= 0) return "Time has passed";
@@ -573,10 +691,8 @@
                 var s = Math.floor((d % 60000) / 1000);
                 return h + 'h ' + (m < 10 ? '0' : '') + m + 'm ' + (s < 10 ? '0' : '') + s + 's';
             }
-
             if (midDate)       document.getElementById('mid-countdown').innerText = diff(midDate);
             if (lastThirdDate) document.getElementById('last-third-countdown').innerText = diff(lastThirdDate);
-
             if (nextUpdateDate) {
                 var ud = nextUpdateDate.getTime() - now;
                 if (ud <= 0) { window.location.reload(); return; }
