@@ -18,91 +18,71 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start; /* Changed to flex-start to accommodate the top widget */
+            justify-content: center;
             height: 100vh;
             margin: 0;
-            padding-top: 5px; /* Added slight top padding */
             text-align: center;
-            box-sizing: border-box; /* Ensures padding is included in height calculation */
         }
-        h1 { color: #58a6ff; margin-bottom: 5px; font-weight: 500; }
-        h2 { color: #8b949e; font-weight: 400; font-size: 1.2rem; margin-top: 0; }
-        .widget {
+        h1 { color: #58a6ff; margin-bottom: 5px; font-weight: 500;}
+        h2 { color: #8b949e; font-weight: 400; font-size: 1.1rem; margin-top: 0; margin-bottom: 20px;}
+        .card {
             background: #161b22;
             border: 1px solid #30363d;
-            border-radius: 12px;
-            padding: 15px;
-            margin: 10px;
-            width: 85%;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 15px;
+            width: 80%;
             max-width: 350px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
         }
         .time-label { font-size: 1rem; color: #8b949e; margin-bottom: 5px; }
-        .time-value { font-size: 2.2rem; font-weight: 600; color: #e6edf3; margin-bottom: 15px; margin-top: 0; }
-        .footer { margin-top: 10px; font-size: 0.8rem; color: #484f58; padding-bottom: 10px; }
-        .verse-widget-content { font-size: 1rem; color: #c9d1d9; line-height: 1.4; font-weight: normal; }
-        .verse-widget-title { font-size: 0.9rem; color: #58a6ff; margin-bottom: 5px; font-weight: 600; }
-        #fajr-maghrib-card { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+        .time-value { font-size: 2.5rem; font-weight: 600; color: #e6edf3; margin-bottom: 5px; margin-top: 0;}
+        .countdown { font-size: 1.2rem; color: #58a6ff; font-weight: bold; margin-bottom: 25px; font-variant-numeric: tabular-nums; }
+        .footer { margin-top: 20px; font-size: 0.9rem; color: #8b949e; }
+        #update-countdown { color: #58a6ff; font-weight: bold; font-variant-numeric: tabular-nums;}
     </style>
 </head>
 <body>
-    <div class="widget" id="constant-verse">
-        <div class="verse-widget-title">Quranic Reflection (Baqarah 2:186)</div>
-        <div class="verse-widget-content">"And when My servants ask you concerning Me - indeed I am near. I respond to the invocation of the supplicant when he calls upon Me. So let them respond to Me and believe in Me that they may be guided."</div>
-    </div>
-
     <h1>Night Worship</h1>
     <h2 id="date-display">Loading...</h2>
     
-    <div class="widget" id="fajr-maghrib-card">
+    <div class="card">
         <div class="time-label">🌙 Middle of the Night</div>
         <div class="time-value" id="mid-time">--:--</div>
+        <div class="countdown" id="mid-countdown">--:--:--</div>
         
         <div class="time-label">✨ Last Third Begins</div>
-        <div class="time-value" id="last-third-time" style="margin-bottom: 0;">--:--</div>
+        <div class="time-value" id="last-third-time">--:--</div>
+        <div class="countdown" id="last-third-countdown" style="margin-bottom: 0;">--:--:--</div>
     </div>
     
-    <div class="widget" id="hourly-verse">
-        <div class="verse-widget-title" id="hourly-verse-title">Hourly Verse</div>
-        <div class="verse-widget-content" id="hourly-verse-content">Loading reflection...</div>
+    <div class="footer">
+        Next app update at 5:00 AM<br>
+        Updating in: <span id="update-countdown">--:--:--</span>
     </div>
 
-    <div class="footer">Times dynamically calculated for Katy, TX</div>
-
     <script>
-        const hourlyVerses = [
-            { title: "Gafur 40:60", content: "And your Lord says, 'Call upon Me; I will respond to you.' Indeed, those who disdain My worship will enter Hell [rendered] contemptible." },
-            { title: "Hud 11:61", content: "And to Thamud [We sent] their brother Salih. He said, 'O my people, worship Allah; you have no deity other than Him. He has produced you from the earth and settled you in it, so ask forgiveness of Him and then repent to Him. Indeed, my Lord is near and responsive.'" },
-            { title: "Az-Zumar 39:53", content: "Say, 'O My servants who have transgressed against themselves [by sinning], do not despair of the mercy of Allah. Indeed, Allah forgives all sins. Indeed, it is He who is the Forgiving, the Merciful.'" },
-            { title: "An-Nisa 4:32", content: "And do not wish for that by which Allah has made some of you exceed others. For men is a share of what they have earned, and for women is a share of what they have earned. And ask Allah of His bounty. Indeed Allah is ever, of all things, Knowing." },
-            { title: "Al-A'raf 7:55", content: "Call upon your Lord in humility and privately; indeed, He does not like transgressors." },
-            { title: "Al-A'raf 7:56", content: "And do not cause corruption upon the earth after its reformation. And call upon Him in fear and aspiration. Indeed, the mercy of Allah is near to the doers of good." },
-            { title: "Al-Baqarah 2:152", content: "So remember Me; I will remember you. And be grateful to Me and do not deny Me." },
-            { title: "Ash-Shura 42:25", content: "And it is He who accepts repentance from His servants and pardons misdeeds, and He knows what you do." },
-            { title: "Al-Mu'minun 23:118", content: "And, [O Muhammad], say, 'My Lord, forgive and have mercy, and You are the best of the merciful.'" },
-            { title: "Al-Isra 17:79", content: "And from [part of] the night, pray with it as additional [worship] for you; it is expected that your Lord will resurrect you to a praised station." },
-            { title: "Al-Muzzammil 73:20", content: "...And whatever good you put forward for yourselves - you will find it with Allah. It is better and greater in reward. And seek forgiveness of Allah. Indeed, Allah is Forgiving and Merciful." },
-            { title: "Qaf 50:16", content: "And We have already created man and know what his soul whispers to him, and We are closer to him than [his] jugular vein." }
-        ];
-
-        function setHourlyVerse() {
-            const now = new Date();
-            const hourIndex = now.getHours() % hourlyVerses.length;
-            const verse = hourlyVerses[hourIndex];
-            document.getElementById('hourly-verse-title').innerText = `Hourly Reflection (${verse.title})`;
-            document.getElementById('hourly-verse-content').innerText = verse.content;
-        }
+        let midDate, lastThirdDate, nextUpdateDate;
 
         async function fetchTimes() {
             const city = "Katy", state = "Texas", country = "US";
-            const today = new Date();
-            const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+            const now = new Date();
             
-            const d1 = `${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`;
-            const d2 = `${tomorrow.getDate()}-${tomorrow.getMonth() + 1}-${tomorrow.getFullYear()}`;
+            // To ensure the night calculation works even after midnight, 
+            // we logically start the new day calculation at 5:00 AM.
+            const baseDate = new Date(now);
+            if (baseDate.getHours() < 5) {
+                baseDate.setDate(baseDate.getDate() - 1);
+            }
             
-            const url1 = `https://api.aladhan.com/v1/timingsByCity/${d1}?city=${city}&state=${state}&country=${country}&method=2`;
-            const url2 = `https://api.aladhan.com/v1/timingsByCity/${d2}?city=${city}&state=${state}&country=${country}&method=2`;
+            const nextDay = new Date(baseDate);
+            nextDay.setDate(baseDate.getDate() + 1);
+            
+            const d1Str = `${baseDate.getDate()}-${baseDate.getMonth() + 1}-${baseDate.getFullYear()}`;
+            const d2Str = `${nextDay.getDate()}-${nextDay.getMonth() + 1}-${nextDay.getFullYear()}`;
+            
+            const url1 = `https://api.aladhan.com/v1/timingsByCity/${d1Str}?city=${city}&state=${state}&country=${country}&method=2`;
+            const url2 = `https://api.aladhan.com/v1/timingsByCity/${d2Str}?city=${city}&state=${state}&country=${country}&method=2`;
             
             try {
                 const [res1, res2] = await Promise.all([
@@ -110,42 +90,81 @@
                     fetch(url2).then(r => r.json())
                 ]);
                 
-                const maghrib = res1.data.timings.Maghrib;
-                const fajr = res2.data.timings.Fajr;
+                // Set Maghrib and Fajr Date objects
+                const maghribParts = res1.data.timings.Maghrib.split(":");
+                const maghribDate = new Date(baseDate);
+                maghribDate.setHours(parseInt(maghribParts[0]), parseInt(maghribParts[1]), 0, 0);
+
+                const fajrParts = res2.data.timings.Fajr.split(":");
+                const fajrDate = new Date(nextDay);
+                fajrDate.setHours(parseInt(fajrParts[0]), parseInt(fajrParts[1]), 0, 0);
+
+                // Calculate durations in milliseconds
+                const durationMs = fajrDate.getTime() - maghribDate.getTime();
+                midDate = new Date(maghribDate.getTime() + (durationMs / 2));
+                lastThirdDate = new Date(maghribDate.getTime() + (durationMs * (2/3)));
                 
-                const mParts = maghrib.split(":");
-                const mMins = parseInt(mParts[0]) * 60 + parseInt(mParts[1]);
-                
-                const fParts = fajr.split(":");
-                const fMins = (parseInt(fParts[0]) + 24) * 60 + parseInt(fParts[1]);
-                
-                const duration = fMins - mMins;
-                const mid = mMins + (duration / 2);
-                const lastThird = mMins + (duration * (2/3));
-                
-                function formatTime(mins) {
-                    const h = Math.floor(mins / 60) % 24;
-                    const m = Math.floor(mins % 60);
+                // Set the next update target to the upcoming 5:00 AM
+                nextUpdateDate = new Date(now);
+                if (nextUpdateDate.getHours() >= 5) {
+                    nextUpdateDate.setDate(nextUpdateDate.getDate() + 1);
+                }
+                nextUpdateDate.setHours(5, 0, 0, 0);
+
+                // Display formatting
+                function formatTime(d) {
+                    let h = d.getHours();
+                    let m = d.getMinutes();
                     const ampm = h >= 12 ? "PM" : "AM";
-                    const h12 = h % 12 || 12;
-                    return `${h12}:${m < 10 ? '0'+m : m} ${ampm}`;
+                    h = h % 12 || 12;
+                    return `${h}:${m < 10 ? '0'+m : m} ${ampm}`;
                 }
                 
-                document.getElementById('mid-time').innerText = formatTime(mid);
-                document.getElementById('last-third-time').innerText = formatTime(lastThird);
+                document.getElementById('mid-time').innerText = formatTime(midDate);
+                document.getElementById('last-third-time').innerText = formatTime(lastThirdDate);
                 
+                // Set the display date (Gregorian and Hijri)
                 const hijri = res1.data.date.hijri;
-                document.getElementById('date-display').innerText = `${hijri.day} ${hijri.month.en} ${hijri.year}`;
+                const greg = res1.data.date.gregorian;
+                document.getElementById('date-display').innerText = `${greg.weekday.en}, ${greg.month.en} ${greg.day} | ${hijri.day} ${hijri.month.en} ${hijri.year}`;
+                
+                // Start the live countdowns
+                setInterval(updateCountdowns, 1000);
+                updateCountdowns();
                 
             } catch (error) {
                 document.getElementById('date-display').innerText = "Error loading times. Check internet.";
             }
         }
-        
-        fetchTimes();
-        setHourlyVerse(); // Initial set
-        // Update the verse every hour
-        setInterval(setHourlyVerse, 3600000); 
-    </script>
-</body>
-</html>
+
+        function updateCountdowns() {
+            const now = new Date().getTime();
+
+            function getDiff(targetTime) {
+                const diff = targetTime.getTime() - now;
+                if (diff <= 0) return "Time has passed";
+                
+                const h = Math.floor(diff / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                // Format with leading zeros for neatness
+                const mStr = m < 10 ? "0" + m : m;
+                const sStr = s < 10 ? "0" + s : s;
+                return `${h}h ${mStr}m ${sStr}s`;
+            }
+
+            if (midDate) document.getElementById('mid-countdown').innerText = getDiff(midDate);
+            if (lastThirdDate) document.getElementById('last-third-countdown').innerText = getDiff(lastThirdDate);
+            
+            if (nextUpdateDate) {
+                const updateDiff = nextUpdateDate.getTime() - now;
+                if (updateDiff <= 0) {
+                    // Force the app to automatically refresh and fetch new times at exactly 5:00 AM
+                    window.location.reload(); 
+                } else {
+                    const h = Math.floor(updateDiff / (1000 * 60 * 60));
+                    const m = Math.floor((updateDiff % (1000 * 60 * 60)) / (1000 * 60));
+                    const s = Math.floor((updateDiff % (1000 * 60)) / 1000);
+                    const mStr = m < 10 ? "0" + m : m;
+                    const
