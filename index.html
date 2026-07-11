@@ -22,9 +22,20 @@
             height: 100vh;
             margin: 0;
             text-align: center;
+            overflow: hidden; /* Prevents scroll during fidgeting */
+            user-select: none;
+            cursor: pointer;
         }
-        h1 { color: #58a6ff; margin-bottom: 5px; font-weight: 500;}
-        h2 { color: #8b949e; font-weight: 400; font-size: 1.1rem; margin-top: 0; margin-bottom: 20px;}
+
+        h1, h2, .footer { transition: transform 0.1s ease, color 0.3s ease; }
+        
+        /* Fidget Effects */
+        .fidget-active { transform: scale(0.95); }
+        .rotate-active { transform: rotate(1deg); }
+
+        h1 { color: #58a6ff; margin-bottom: 5px; font-weight: 500; }
+        h2 { color: #8b949e; font-weight: 400; font-size: 1.1rem; margin-top: 0; margin-bottom: 20px; }
+        
         .card {
             background: #161b22;
             border: 1px solid #30363d;
@@ -34,17 +45,36 @@
             width: 80%;
             max-width: 350px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s;
         }
-        .time-label { font-size: 1rem; color: #8b949e; margin-bottom: 5px; }
-        .time-value { font-size: 2.5rem; font-weight: 600; color: #e6edf3; margin-bottom: 5px; margin-top: 0;}
+
+        .card:active { transform: scale(0.98); background: #1c2128; }
+
+        .time-label { font-size: 1rem; color: #8b949e; margin-bottom: 5px; pointer-events: none; }
+        .time-value { font-size: 2.5rem; font-weight: 600; color: #e6edf3; margin-bottom: 5px; margin-top: 0; }
         .countdown { font-size: 1.2rem; color: #58a6ff; font-weight: bold; margin-bottom: 25px; font-variant-numeric: tabular-nums; }
+        
         .footer { margin-top: 20px; font-size: 0.9rem; color: #8b949e; }
         #update-countdown { color: #58a6ff; font-weight: bold; font-variant-numeric: tabular-nums;}
+
+        /* Ripple Effect for Background */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+            background-color: rgba(88, 166, 255, 0.3);
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            to { transform: scale(4); opacity: 0; }
+        }
     </style>
 </head>
-<body>
-    <h1>Night Worship</h1>
-    <h2 id="date-display">Loading...</h2>
+<body onclick="createRipple(event)">
+    <h1 onclick="fidget(this)">Night Worship</h1>
+    <h2 id="date-display" onclick="fidget(this)">Loading...</h2>
     
     <div class="card">
         <div class="time-label">🌙 Middle of the Night</div>
@@ -56,13 +86,32 @@
         <div class="countdown" id="last-third-countdown" style="margin-bottom: 0;">--:--:--</div>
     </div>
     
-    <div class="footer">
+    <div class="footer" onclick="fidget(this)">
         Next app update at 5:00 AM<br>
         Updating in: <span id="update-countdown">--:--:--</span>
     </div>
 
     <script>
         let midDate, lastThirdDate, nextUpdateDate;
+
+        // Fidget Logic
+        function fidget(el) {
+            el.classList.add('fidget-active');
+            setTimeout(() => el.classList.remove('fidget-active'), 100);
+        }
+
+        function createRipple(event) {
+            const ripple = document.createElement("div");
+            ripple.className = "ripple";
+            
+            const size = Math.max(window.innerWidth, window.innerHeight);
+            ripple.style.width = ripple.style.height = `${size}px`;
+            ripple.style.left = `${event.clientX - size / 2}px`;
+            ripple.style.top = `${event.clientY - size / 2}px`;
+            
+            document.body.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        }
 
         async function fetchTimes() {
             const city = "Katy", state = "Texas", country = "US";
@@ -117,7 +166,6 @@
                 document.getElementById('mid-time').innerText = formatTime(midDate);
                 document.getElementById('last-third-time').innerText = formatTime(lastThirdDate);
                 
-                // Formats the split Gregorian Date
                 const greg1 = res1.data.date.gregorian;
                 const greg2 = res2.data.date.gregorian;
                 const hijri = res1.data.date.hijri;
