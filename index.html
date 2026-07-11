@@ -24,6 +24,12 @@
             --btn-fg: #0d1117;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
         body {
             background-color: var(--bg);
             color: var(--text);
@@ -32,11 +38,9 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            height: 100dvh;
             margin: 0;
             text-align: center;
-            position: relative;
+            touch-action: none;
         }
         h1 {
             color: var(--accent);
@@ -46,13 +50,9 @@
             user-select: none;
             position: relative;
             z-index: 1;
+            transition: text-shadow 0.15s ease;
         }
-        h1.glow { animation: titleGlow 1.1s ease-in-out; }
-        @keyframes titleGlow {
-            0%   { text-shadow: 0 0 4px var(--accent-glow); filter: brightness(1); }
-            35%  { text-shadow: 0 0 20px var(--accent-glow), 0 0 50px var(--accent-glow); filter: brightness(1.15); }
-            100% { text-shadow: 0 0 4px var(--accent-glow); filter: brightness(1); }
-        }
+        h1.glow { text-shadow: 0 0 14px var(--accent-glow), 0 0 40px var(--accent-glow); }
         h2 {
             color: var(--text-muted);
             font-weight: 400;
@@ -75,14 +75,14 @@
             width: 80%;
             max-width: 350px;
             box-shadow: 0 8px 24px var(--shadow);
-            transition: transform 0.22s ease-out, box-shadow 0.7s ease, border-color 0.7s ease;
-            will-change: transform;
+            transition: box-shadow 0.5s ease, border-color 0.5s ease;
             position: relative;
             z-index: 1;
-            touch-action: none;
+            cursor: pointer;
+            user-select: none;
         }
-        .card.ring {
-            box-shadow: 0 8px 24px var(--shadow), 0 0 0 2px var(--accent), 0 0 24px var(--accent-glow);
+        .card.glow {
+            box-shadow: 0 8px 24px var(--shadow), 0 0 0 2px var(--accent), 0 0 28px var(--accent-glow);
             border-color: var(--accent);
         }
         .time-label {
@@ -93,6 +93,7 @@
             user-select: none;
             display: inline-block;
         }
+        .time-label.glow { text-shadow: 0 0 10px var(--accent-glow); }
         .time-label.pop { animation: pop 0.32s cubic-bezier(.34,1.56,.64,1); }
         @keyframes pop {
             0%   { transform: scale(1) rotate(0deg); }
@@ -122,13 +123,10 @@
             font-variant-numeric: tabular-nums;
             cursor: pointer;
             user-select: none;
-            transition: text-shadow 0.35s ease, transform 0.35s cubic-bezier(.34,1.56,.64,1);
             display: inline-block;
+            transition: text-shadow 0.2s ease;
         }
-        .countdown.pulse {
-            text-shadow: 0 0 18px var(--accent-glow), 0 0 36px var(--accent-glow);
-            transform: scale(1.06);
-        }
+        .countdown.glow { text-shadow: 0 0 16px var(--accent-glow), 0 0 32px var(--accent-glow); }
         .footer {
             margin-top: 20px;
             font-size: 0.9rem;
@@ -163,13 +161,26 @@
         .sparkle {
             position: fixed;
             pointer-events: none;
-            font-size: 11px;
             opacity: 0;
-            animation: drift 2.6s ease-out forwards;
             z-index: 0;
+            will-change: transform, opacity;
+        }
+        .sparkle.trail {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: trailUp 1.4s ease-out forwards;
+        }
+        .sparkle.tap {
+            font-size: 11px;
+            animation: drift 2.6s ease-out forwards;
+        }
+        @keyframes trailUp {
+            0%   { opacity: 0.65; transform: translateY(0) translateX(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-45px) translateX(var(--dx, 0px)) scale(0.1); }
         }
         @keyframes drift {
-            0%   { opacity: 0; transform: translateY(0) translateX(0) scale(0.2); }
+            0%   { opacity: 0; transform: translateY(0) scale(0.2); }
             10%  { opacity: 0.7; transform: translateY(-5px) scale(1.1); }
             100% { opacity: 0; transform: translateY(-80px) translateX(var(--dx, 0px)) scale(0.08); }
         }
@@ -206,7 +217,6 @@
             gap: 10px;
             box-shadow: 0 6px 24px var(--shadow);
             transform-origin: bottom right;
-            transition: opacity 0.2s ease, transform 0.2s ease;
         }
         #tpanel.open { display: flex; animation: panelIn 0.2s ease-out; }
         @keyframes panelIn {
@@ -301,35 +311,24 @@
         }
 
         (function() {
-            try {
-                var s = localStorage.getItem('nw-theme');
-                if (s && themes[s]) setTheme(s);
-            } catch(e) {}
+            try { var s = localStorage.getItem('nw-theme'); if (s && themes[s]) setTheme(s); } catch(e) {}
         })();
 
         var tbtn = document.getElementById('tbtn');
         var tpanel = document.getElementById('tpanel');
-        tbtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            tpanel.classList.toggle('open');
-        });
+        tbtn.addEventListener('click', function(e) { e.stopPropagation(); tpanel.classList.toggle('open'); });
         tbtn.addEventListener('touchend', function(e) { e.stopPropagation(); });
         document.querySelectorAll('.tdot').forEach(function(d) {
             d.addEventListener('click', function(e) {
-                e.stopPropagation();
-                setTheme(this.dataset.t);
+                e.stopPropagation(); setTheme(this.dataset.t);
                 setTimeout(function() { tpanel.classList.remove('open'); }, 120);
             });
         });
         document.addEventListener('click', function(e) {
-            if (!tpanel.contains(e.target) && !tbtn.contains(e.target)) {
-                tpanel.classList.remove('open');
-            }
+            if (!tpanel.contains(e.target) && !tbtn.contains(e.target)) tpanel.classList.remove('open');
         });
         document.addEventListener('touchstart', function(e) {
-            if (!tpanel.contains(e.target) && !tbtn.contains(e.target)) {
-                tpanel.classList.remove('open');
-            }
+            if (!tpanel.contains(e.target) && !tbtn.contains(e.target)) tpanel.classList.remove('open');
         }, { passive: true });
 
         /* ═══════════ State ═══════════ */
@@ -341,37 +340,93 @@
         var starGlyphs = ['✨','⭐','🌟','💫'];
         var si = 0;
 
-        /* ═══ 1. Background: tap empty space → cluster of drifting sparkles ═══ */
-        document.body.addEventListener('click', function(e) {
-            if (e.target !== document.body) return;
-            var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+        /* ═══════════ Sparkle helpers ═══════════ */
+        function accentColor() {
+            return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+        }
+
+        /* Trail sparkle: small glowing dot */
+        function spawnTrail(x, y) {
+            var el = document.createElement('div');
+            el.className = 'sparkle trail';
+            el.style.left = (x - 3) + 'px';
+            el.style.top  = (y - 3) + 'px';
+            el.style.background = accentColor();
+            el.style.boxShadow = '0 0 6px ' + accentColor();
+            el.style.setProperty('--dx', ((Math.random() - 0.5) * 20) + 'px');
+            document.body.appendChild(el);
+            setTimeout(function() { el.remove(); }, 1500);
+        }
+
+        /* Tap sparkle: tiny text glyph */
+        function spawnTapCluster(x, y) {
+            var glyphs = ['·','✦','⋆','✧','·'];
             for (var i = 0; i < 4; i++) {
                 (function(delay) {
                     setTimeout(function() {
                         var el = document.createElement('div');
-                        el.className = 'sparkle';
-                        var glyphs = ['·','✦','⋅','⋆','✧','·'];
+                        el.className = 'sparkle tap';
                         el.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
-                        el.style.left = (e.clientX + (Math.random() - 0.5) * 44 - 5) + 'px';
-                        el.style.top  = (e.clientY + (Math.random() - 0.5) * 30 - 5) + 'px';
-                        el.style.color = accent;
+                        el.style.left = (x + (Math.random() - 0.5) * 40 - 5) + 'px';
+                        el.style.top  = (y + (Math.random() - 0.5) * 30 - 5) + 'px';
+                        el.style.color = accentColor();
                         el.style.setProperty('--dx', ((Math.random() - 0.5) * 28) + 'px');
                         document.body.appendChild(el);
                         setTimeout(function() { el.remove(); }, 2700);
                     }, delay);
-                })(i * 50);
+                })(i * 45);
             }
-        });
+        }
 
-        /* ═══ 2. Title: click → animated glow shimmer ═══ */
+        /* ═══════════ Touch trail on body ═══════════ */
+        var lastTrailTime = 0;
+        var isTrailing = false;
+
+        document.body.addEventListener('touchstart', function(e) {
+            if (e.target !== document.body) return;
+            isTrailing = true;
+            var t = e.touches[0];
+            spawnTapCluster(t.clientX, t.clientY);
+        }, { passive: true });
+
+        document.body.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+            if (!isTrailing) return;
+            var now = Date.now();
+            if (now - lastTrailTime < 30) return; // throttle ~33fps
+            lastTrailTime = now;
+            var t = e.touches[0];
+            spawnTrail(t.clientX, t.clientY);
+        }, { passive: false });
+
+        document.body.addEventListener('touchend', function() { isTrailing = false; }, { passive: true });
+
+        /* Mouse trail on empty background too */
+        var mouseDown = false;
+        var lastMouseTrail = 0;
+        document.body.addEventListener('mousedown', function(e) {
+            if (e.target !== document.body) return;
+            mouseDown = true;
+            spawnTapCluster(e.clientX, e.clientY);
+        });
+        document.body.addEventListener('mousemove', function(e) {
+            if (!mouseDown) return;
+            var now = Date.now();
+            if (now - lastMouseTrail < 30) return;
+            lastMouseTrail = now;
+            spawnTrail(e.clientX, e.clientY);
+        });
+        document.body.addEventListener('mouseup', function() { mouseDown = false; });
+
+        /* ═══ 2. Title: tap → simple glow ═══ */
         var titleEl = document.getElementById('title');
         titleEl.addEventListener('click', function() {
-            this.classList.remove('glow');
-            void this.offsetWidth;
             this.classList.add('glow');
+            var self = this;
+            setTimeout(function() { self.classList.remove('glow'); }, 700);
         });
 
-        /* ═══ 3. Date: click → cycle full / gregorian / hijri ═══ */
+        /* ═══ 3. Date: tap → cycle full / gregorian / hijri (kept animation) ═══ */
         var dateEl = document.getElementById('date-display');
         dateEl.addEventListener('click', function() {
             dateMode = (dateMode + 1) % 3;
@@ -386,35 +441,15 @@
             }, 260);
         });
 
-        /* ═══ 4. Card: tilt on move + double-tap/click ring ═══ */
+        /* ═══ 4. Card: tap → simple glow (replaced tilt) ═══ */
         var card = document.getElementById('card');
-        var lastCardTap = 0;
-        function tiltCard(cx, cy) {
-            var r = card.getBoundingClientRect();
-            var x = (cx - r.left) / r.width - 0.5;
-            var y = (cy - r.top) / r.height - 0.5;
-            card.style.transform = 'perspective(600px) rotateY(' + (x * 8) + 'deg) rotateX(' + (-y * 8) + 'deg)';
-        }
-        function resetTilt() { card.style.transform = 'perspective(600px) rotateY(0) rotateX(0)'; }
-        function cardRing() {
-            card.classList.remove('ring'); void card.offsetWidth; card.classList.add('ring');
-            setTimeout(function() { card.classList.remove('ring'); }, 1600);
-        }
-        card.addEventListener('mousemove', function(e) { tiltCard(e.clientX, e.clientY); });
-        card.addEventListener('mouseleave', resetTilt);
-        card.addEventListener('touchstart', function(e) {
-            var now = Date.now();
-            if (now - lastCardTap < 350) { cardRing(); lastCardTap = 0; }
-            else { lastCardTap = now; }
-        }, { passive: true });
-        card.addEventListener('touchmove', function(e) {
-            e.preventDefault();
-            tiltCard(e.touches[0].clientX, e.touches[0].clientY);
-        }, { passive: false });
-        card.addEventListener('touchend', resetTilt);
-        card.addEventListener('dblclick', cardRing);
+        card.addEventListener('click', function() {
+            this.classList.add('glow');
+            var self = this;
+            setTimeout(function() { self.classList.remove('glow'); }, 900);
+        });
 
-        /* ═══ 5. Moon label: click → cycle phase emoji + pop ═══ */
+        /* ═══ 5. Moon label: tap → cycle phase emoji + pop (kept animation) ═══ */
         var midLabel = document.getElementById('mid-label');
         midLabel.addEventListener('click', function() {
             mi = (mi + 1) % moons.length;
@@ -422,15 +457,17 @@
             this.classList.remove('pop'); void this.offsetWidth; this.classList.add('pop');
         });
 
-        /* ═══ 6. Star label: click → cycle sparkle emoji + pop ═══ */
+        /* ═══ 6. Star label: tap → simple glow (replaced pop) ═══ */
         var ltLabel = document.getElementById('lt-label');
         ltLabel.addEventListener('click', function() {
             si = (si + 1) % starGlyphs.length;
             this.textContent = starGlyphs[si] + ' Last Third Begins';
-            this.classList.remove('pop'); void this.offsetWidth; this.classList.add('pop');
+            this.classList.add('glow');
+            var self = this;
+            setTimeout(function() { self.classList.remove('glow'); }, 600);
         });
 
-        /* ═══ 7. Time values: click → toggle 12h/24h with flip ═══ */
+        /* ═══ 7. Time values: tap → toggle 12h/24h with flip (kept animation) ═══ */
         function fmt(d, h24) {
             if (h24) return (d.getHours() < 10 ? '0' : '') + d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
             var h = d.getHours(), m = d.getMinutes(), ap = h >= 12 ? 'PM' : 'AM';
@@ -450,16 +487,16 @@
         document.getElementById('mid-time').addEventListener('click', flipFormat);
         document.getElementById('last-third-time').addEventListener('click', flipFormat);
 
-        /* ═══ 8. Countdowns: tap → glow + scale pulse ═══ */
+        /* ═══ 8. Countdowns: tap → simple glow (replaced pulse+scale) ═══ */
         document.querySelectorAll('.countdown').forEach(function(el) {
             el.addEventListener('click', function() {
-                this.classList.remove('pulse'); void this.offsetWidth; this.classList.add('pulse');
+                this.classList.add('glow');
                 var self = this;
-                setTimeout(function() { self.classList.remove('pulse'); }, 550);
+                setTimeout(function() { self.classList.remove('glow'); }, 550);
             });
         });
 
-        /* ═══ 9. Footer: click → toggle info panes ═══ */
+        /* ═══ 9. Footer: tap → toggle info panes (kept animation) ═══ */
         document.getElementById('footer').addEventListener('click', function() {
             footerPane = 1 - footerPane;
             var a = document.getElementById('f-up'), b = document.getElementById('f-loc');
