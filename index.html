@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Night Worship</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Night Times">
+    <meta name="theme-color" content="#0d1117">
+    <!-- This creates a moon icon automatically for iOS -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌙</text></svg>">
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        h1 { color: #58a6ff; margin-bottom: 5px; font-weight: 500;}
+        h2 { color: #8b949e; font-weight: 400; font-size: 1.2rem; margin-top: 0;}
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 15px;
+            width: 80%;
+            max-width: 350px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+        .time-label { font-size: 1rem; color: #8b949e; margin-bottom: 5px; }
+        .time-value { font-size: 2.5rem; font-weight: 600; color: #e6edf3; margin-bottom: 25px; margin-top: 0;}
+        .footer { margin-top: 20px; font-size: 0.9rem; color: #484f58; }
+    </style>
+</head>
+<body>
+    <h1>Night Worship</h1>
+    <h2 id="date-display">Loading...</h2>
+    
+    <div class="card">
+        <div class="time-label">🌙 Middle of the Night</div>
+        <div class="time-value" id="mid-time">--:--</div>
+        
+        <div class="time-label">✨ Last Third Begins</div>
+        <div class="time-value" id="last-third-time" style="margin-bottom: 0;">--:--</div>
+    </div>
+    
+    <div class="footer">Times dynamically calculated for Katy, TX</div>
+
+    <script>
+        async function fetchTimes() {
+            const city = "Katy", state = "Texas", country = "US";
+            const today = new Date();
+            const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+            
+            const d1 = `${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`;
+            const d2 = `${tomorrow.getDate()}-${tomorrow.getMonth() + 1}-${tomorrow.getFullYear()}`;
+            
+            const url1 = `https://api.aladhan.com/v1/timingsByCity/${d1}?city=${city}&state=${state}&country=${country}&method=2`;
+            const url2 = `https://api.aladhan.com/v1/timingsByCity/${d2}?city=${city}&state=${state}&country=${country}&method=2`;
+            
+            try {
+                const [res1, res2] = await Promise.all([
+                    fetch(url1).then(r => r.json()),
+                    fetch(url2).then(r => r.json())
+                ]);
+                
+                const maghrib = res1.data.timings.Maghrib;
+                const fajr = res2.data.timings.Fajr;
+                
+                const mParts = maghrib.split(":");
+                const mMins = parseInt(mParts[0]) * 60 + parseInt(mParts[1]);
+                
+                const fParts = fajr.split(":");
+                const fMins = (parseInt(fParts[0]) + 24) * 60 + parseInt(fParts[1]);
+                
+                const duration = fMins - mMins;
+                const mid = mMins + (duration / 2);
+                const lastThird = mMins + (duration * (2/3));
+                
+                function formatTime(mins) {
+                    const h = Math.floor(mins / 60) % 24;
+                    const m = Math.floor(mins % 60);
+                    const ampm = h >= 12 ? "PM" : "AM";
+                    const h12 = h % 12 || 12;
+                    return `${h12}:${m < 10 ? '0'+m : m} ${ampm}`;
+                }
+                
+                document.getElementById('mid-time').innerText = formatTime(mid);
+                document.getElementById('last-third-time').innerText = formatTime(lastThird);
+                
+                const hijri = res1.data.date.hijri;
+                document.getElementById('date-display').innerText = `${hijri.day} ${hijri.month.en} ${hijri.year}`;
+                
+            } catch (error) {
+                document.getElementById('date-display').innerText = "Error loading times. Check internet.";
+            }
+        }
+        
+        fetchTimes();
+    </script>
+</body>
+</html>
