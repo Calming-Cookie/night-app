@@ -9,7 +9,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Night Times">
     <meta name="theme-color" content="#0d1117">
-    <!-- This creates a moon icon automatically for iOS -->
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌙</text></svg>">
     <style>
         body {
@@ -19,33 +18,43 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start; /* Changed to flex-start to accommodate the top widget */
             height: 100vh;
             margin: 0;
+            padding-top: 5px; /* Added slight top padding */
             text-align: center;
+            box-sizing: border-box; /* Ensures padding is included in height calculation */
         }
-        h1 { color: #58a6ff; margin-bottom: 5px; font-weight: 500;}
-        h2 { color: #8b949e; font-weight: 400; font-size: 1.2rem; margin-top: 0;}
-        .card {
+        h1 { color: #58a6ff; margin-bottom: 5px; font-weight: 500; }
+        h2 { color: #8b949e; font-weight: 400; font-size: 1.2rem; margin-top: 0; }
+        .widget {
             background: #161b22;
             border: 1px solid #30363d;
-            border-radius: 15px;
-            padding: 30px;
-            margin: 15px;
-            width: 80%;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px;
+            width: 85%;
             max-width: 350px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .time-label { font-size: 1rem; color: #8b949e; margin-bottom: 5px; }
-        .time-value { font-size: 2.5rem; font-weight: 600; color: #e6edf3; margin-bottom: 25px; margin-top: 0;}
-        .footer { margin-top: 20px; font-size: 0.9rem; color: #484f58; }
+        .time-value { font-size: 2.2rem; font-weight: 600; color: #e6edf3; margin-bottom: 15px; margin-top: 0; }
+        .footer { margin-top: 10px; font-size: 0.8rem; color: #484f58; padding-bottom: 10px; }
+        .verse-widget-content { font-size: 1rem; color: #c9d1d9; line-height: 1.4; font-weight: normal; }
+        .verse-widget-title { font-size: 0.9rem; color: #58a6ff; margin-bottom: 5px; font-weight: 600; }
+        #fajr-maghrib-card { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
     </style>
 </head>
 <body>
+    <div class="widget" id="constant-verse">
+        <div class="verse-widget-title">Quranic Reflection (Baqarah 2:186)</div>
+        <div class="verse-widget-content">"And when My servants ask you concerning Me - indeed I am near. I respond to the invocation of the supplicant when he calls upon Me. So let them respond to Me and believe in Me that they may be guided."</div>
+    </div>
+
     <h1>Night Worship</h1>
     <h2 id="date-display">Loading...</h2>
     
-    <div class="card">
+    <div class="widget" id="fajr-maghrib-card">
         <div class="time-label">🌙 Middle of the Night</div>
         <div class="time-value" id="mid-time">--:--</div>
         
@@ -53,9 +62,37 @@
         <div class="time-value" id="last-third-time" style="margin-bottom: 0;">--:--</div>
     </div>
     
+    <div class="widget" id="hourly-verse">
+        <div class="verse-widget-title" id="hourly-verse-title">Hourly Verse</div>
+        <div class="verse-widget-content" id="hourly-verse-content">Loading reflection...</div>
+    </div>
+
     <div class="footer">Times dynamically calculated for Katy, TX</div>
 
     <script>
+        const hourlyVerses = [
+            { title: "Gafur 40:60", content: "And your Lord says, 'Call upon Me; I will respond to you.' Indeed, those who disdain My worship will enter Hell [rendered] contemptible." },
+            { title: "Hud 11:61", content: "And to Thamud [We sent] their brother Salih. He said, 'O my people, worship Allah; you have no deity other than Him. He has produced you from the earth and settled you in it, so ask forgiveness of Him and then repent to Him. Indeed, my Lord is near and responsive.'" },
+            { title: "Az-Zumar 39:53", content: "Say, 'O My servants who have transgressed against themselves [by sinning], do not despair of the mercy of Allah. Indeed, Allah forgives all sins. Indeed, it is He who is the Forgiving, the Merciful.'" },
+            { title: "An-Nisa 4:32", content: "And do not wish for that by which Allah has made some of you exceed others. For men is a share of what they have earned, and for women is a share of what they have earned. And ask Allah of His bounty. Indeed Allah is ever, of all things, Knowing." },
+            { title: "Al-A'raf 7:55", content: "Call upon your Lord in humility and privately; indeed, He does not like transgressors." },
+            { title: "Al-A'raf 7:56", content: "And do not cause corruption upon the earth after its reformation. And call upon Him in fear and aspiration. Indeed, the mercy of Allah is near to the doers of good." },
+            { title: "Al-Baqarah 2:152", content: "So remember Me; I will remember you. And be grateful to Me and do not deny Me." },
+            { title: "Ash-Shura 42:25", content: "And it is He who accepts repentance from His servants and pardons misdeeds, and He knows what you do." },
+            { title: "Al-Mu'minun 23:118", content: "And, [O Muhammad], say, 'My Lord, forgive and have mercy, and You are the best of the merciful.'" },
+            { title: "Al-Isra 17:79", content: "And from [part of] the night, pray with it as additional [worship] for you; it is expected that your Lord will resurrect you to a praised station." },
+            { title: "Al-Muzzammil 73:20", content: "...And whatever good you put forward for yourselves - you will find it with Allah. It is better and greater in reward. And seek forgiveness of Allah. Indeed, Allah is Forgiving and Merciful." },
+            { title: "Qaf 50:16", content: "And We have already created man and know what his soul whispers to him, and We are closer to him than [his] jugular vein." }
+        ];
+
+        function setHourlyVerse() {
+            const now = new Date();
+            const hourIndex = now.getHours() % hourlyVerses.length;
+            const verse = hourlyVerses[hourIndex];
+            document.getElementById('hourly-verse-title').innerText = `Hourly Reflection (${verse.title})`;
+            document.getElementById('hourly-verse-content').innerText = verse.content;
+        }
+
         async function fetchTimes() {
             const city = "Katy", state = "Texas", country = "US";
             const today = new Date();
@@ -106,6 +143,9 @@
         }
         
         fetchTimes();
+        setHourlyVerse(); // Initial set
+        // Update the verse every hour
+        setInterval(setHourlyVerse, 3600000); 
     </script>
 </body>
 </html>
