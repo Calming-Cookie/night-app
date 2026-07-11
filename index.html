@@ -11,214 +11,548 @@
     <meta name="theme-color" content="#0d1117">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌙</text></svg>">
     <style>
+        :root {
+            --bg: #0d1117;
+            --card-bg: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --text-bright: #e6edf3;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --accent-glow: rgba(88,166,255,0.55);
+            --shadow: rgba(0,0,0,0.2);
+            --btn-fg: #0d1117;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
-            background-color: #0d1117;
-            color: #c9d1d9;
+            background-color: var(--bg);
+            color: var(--text);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
+            height: 100dvh;
             margin: 0;
             text-align: center;
-            overflow: hidden; /* Prevents scroll during fidgeting */
-            user-select: none;
-            cursor: pointer;
+            position: relative;
         }
-
-        h1, h2, .footer { transition: transform 0.1s ease, color 0.3s ease; }
-        
-        /* Fidget Effects */
-        .fidget-active { transform: scale(0.95); }
-        .rotate-active { transform: rotate(1deg); }
-
-        h1 { color: #58a6ff; margin-bottom: 5px; font-weight: 500; }
-        h2 { color: #8b949e; font-weight: 400; font-size: 1.1rem; margin-top: 0; margin-bottom: 20px; }
-        
+        h1 {
+            color: var(--accent);
+            margin-bottom: 5px;
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            z-index: 1;
+        }
+        h1.glow { animation: titleGlow 1.1s ease-in-out; }
+        @keyframes titleGlow {
+            0%   { text-shadow: 0 0 4px var(--accent-glow); filter: brightness(1); }
+            35%  { text-shadow: 0 0 20px var(--accent-glow), 0 0 50px var(--accent-glow); filter: brightness(1.15); }
+            100% { text-shadow: 0 0 4px var(--accent-glow); filter: brightness(1); }
+        }
+        h2 {
+            color: var(--text-muted);
+            font-weight: 400;
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 20px;
+            cursor: pointer;
+            user-select: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            position: relative;
+            z-index: 1;
+        }
+        h2.out { opacity: 0; transform: translateY(-5px); }
         .card {
-            background: #161b22;
-            border: 1px solid #30363d;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: 15px;
             padding: 30px;
             margin: 15px;
             width: 80%;
             max-width: 350px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s;
+            box-shadow: 0 8px 24px var(--shadow);
+            transition: transform 0.22s ease-out, box-shadow 0.7s ease, border-color 0.7s ease;
+            will-change: transform;
+            position: relative;
+            z-index: 1;
+            touch-action: none;
         }
-
-        .card:active { transform: scale(0.98); background: #1c2128; }
-
-        .time-label { font-size: 1rem; color: #8b949e; margin-bottom: 5px; pointer-events: none; }
-        .time-value { font-size: 2.5rem; font-weight: 600; color: #e6edf3; margin-bottom: 5px; margin-top: 0; }
-        .countdown { font-size: 1.2rem; color: #58a6ff; font-weight: bold; margin-bottom: 25px; font-variant-numeric: tabular-nums; }
-        
-        .footer { margin-top: 20px; font-size: 0.9rem; color: #8b949e; }
-        #update-countdown { color: #58a6ff; font-weight: bold; font-variant-numeric: tabular-nums;}
-
-        /* Ripple Effect for Background */
-        .ripple {
+        .card.ring {
+            box-shadow: 0 8px 24px var(--shadow), 0 0 0 2px var(--accent), 0 0 24px var(--accent-glow);
+            border-color: var(--accent);
+        }
+        .time-label {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            cursor: pointer;
+            user-select: none;
+            display: inline-block;
+        }
+        .time-label.pop { animation: pop 0.32s cubic-bezier(.34,1.56,.64,1); }
+        @keyframes pop {
+            0%   { transform: scale(1) rotate(0deg); }
+            30%  { transform: scale(1.14) rotate(-3deg); }
+            60%  { transform: scale(1.06) rotate(1deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        .time-value {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--text-bright);
+            margin-bottom: 5px;
+            margin-top: 0;
+            cursor: pointer;
+            user-select: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .time-value.flip {
+            opacity: 0.1;
+            transform: translateY(-6px) scale(0.97);
+        }
+        .countdown {
+            font-size: 1.2rem;
+            color: var(--accent);
+            font-weight: bold;
+            margin-bottom: 25px;
+            font-variant-numeric: tabular-nums;
+            cursor: pointer;
+            user-select: none;
+            transition: text-shadow 0.35s ease, transform 0.35s cubic-bezier(.34,1.56,.64,1);
+            display: inline-block;
+        }
+        .countdown.pulse {
+            text-shadow: 0 0 18px var(--accent-glow), 0 0 36px var(--accent-glow);
+            transform: scale(1.06);
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            z-index: 1;
+            min-height: 2.8em;
+        }
+        .fp {
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+        .fp.off {
+            opacity: 0;
             position: absolute;
-            border-radius: 50%;
-            transform: scale(0);
-            animation: ripple-animation 0.6s linear;
-            background-color: rgba(88, 166, 255, 0.3);
             pointer-events: none;
+            left: 50%;
+            transform: translateX(-50%) translateY(8px);
+            white-space: nowrap;
         }
-
-        @keyframes ripple-animation {
-            to { transform: scale(4); opacity: 0; }
+        .fp.on {
+            opacity: 1;
+            position: relative;
+            transform: translateX(0) translateY(0);
         }
+        #update-countdown {
+            color: var(--accent);
+            font-weight: bold;
+            font-variant-numeric: tabular-nums;
+        }
+        .sparkle {
+            position: fixed;
+            pointer-events: none;
+            font-size: 11px;
+            opacity: 0;
+            animation: drift 2.6s ease-out forwards;
+            z-index: 0;
+        }
+        @keyframes drift {
+            0%   { opacity: 0; transform: translateY(0) translateX(0) scale(0.2); }
+            10%  { opacity: 0.7; transform: translateY(-5px) scale(1.1); }
+            100% { opacity: 0; transform: translateY(-80px) translateX(var(--dx, 0px)) scale(0.08); }
+        }
+        #tbtn {
+            position: fixed;
+            bottom: 14px;
+            right: 14px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--border);
+            cursor: pointer;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.3;
+            transition: opacity 0.3s ease, transform 0.2s ease;
+        }
+        #tbtn:hover, #tbtn:active { opacity: 1; transform: scale(1.15); }
+        #tbtn span { font-size: 11px; color: var(--btn-fg); line-height: 1; pointer-events: none; }
+        #tpanel {
+            position: fixed;
+            bottom: 48px;
+            right: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 8px 10px;
+            z-index: 200;
+            display: none;
+            flex-direction: row;
+            gap: 10px;
+            box-shadow: 0 6px 24px var(--shadow);
+            transform-origin: bottom right;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        #tpanel.open { display: flex; animation: panelIn 0.2s ease-out; }
+        @keyframes panelIn {
+            from { opacity: 0; transform: scale(0.85) translateY(6px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .tdot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2.5px solid transparent;
+            transition: transform 0.18s cubic-bezier(.34,1.56,.64,1), border-color 0.2s ease;
+        }
+        .tdot:hover, .tdot:active { transform: scale(1.25); }
+        .tdot.active { border-color: var(--text-bright); transform: scale(1.1); }
     </style>
 </head>
-<body onclick="createRipple(event)">
-    <h1 onclick="fidget(this)">Night Worship</h1>
-    <h2 id="date-display" onclick="fidget(this)">Loading...</h2>
-    
-    <div class="card">
-        <div class="time-label">🌙 Middle of the Night</div>
+<body>
+
+    <h1 id="title">Night Worship</h1>
+    <h2 id="date-display">Loading...</h2>
+
+    <div class="card" id="card">
+        <div class="time-label" id="mid-label">🌙 Middle of the Night</div>
         <div class="time-value" id="mid-time">--:--</div>
         <div class="countdown" id="mid-countdown">--:--:--</div>
-        
-        <div class="time-label">✨ Last Third Begins</div>
+
+        <div class="time-label" id="lt-label">✨ Last Third Begins</div>
         <div class="time-value" id="last-third-time">--:--</div>
         <div class="countdown" id="last-third-countdown" style="margin-bottom: 0;">--:--:--</div>
     </div>
-    
-    <div class="footer" onclick="fidget(this)">
-        Next app update at 5:00 AM<br>
-        Updating in: <span id="update-countdown">--:--:--</span>
+
+    <div class="footer" id="footer">
+        <div class="fp on" id="f-up">Next app update at 5:00 AM<br>Updating in: <span id="update-countdown">--:--:--</span></div>
+        <div class="fp off" id="f-loc">Times for Katy, Texas<br>Calculation method: ISNA</div>
+    </div>
+
+    <div id="tbtn"><span>◐</span></div>
+    <div id="tpanel">
+        <div class="tdot active" data-t="midnight" style="background:#58a6ff"></div>
+        <div class="tdot" data-t="cream" style="background:#c49a2a"></div>
+        <div class="tdot" data-t="forest" style="background:#4ade80"></div>
+        <div class="tdot" data-t="dusk" style="background:#a78bfa"></div>
+        <div class="tdot" data-t="ember" style="background:#f59e42"></div>
     </div>
 
     <script>
-        let midDate, lastThirdDate, nextUpdateDate;
-
-        // Fidget Logic
-        function fidget(el) {
-            el.classList.add('fidget-active');
-            setTimeout(() => el.classList.remove('fidget-active'), 100);
-        }
-
-        function createRipple(event) {
-            const ripple = document.createElement("div");
-            ripple.className = "ripple";
-            
-            const size = Math.max(window.innerWidth, window.innerHeight);
-            ripple.style.width = ripple.style.height = `${size}px`;
-            ripple.style.left = `${event.clientX - size / 2}px`;
-            ripple.style.top = `${event.clientY - size / 2}px`;
-            
-            document.body.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 600);
-        }
-
-        async function fetchTimes() {
-            const city = "Katy", state = "Texas", country = "US";
-            const now = new Date();
-            
-            const baseDate = new Date(now);
-            if (baseDate.getHours() < 5) {
-                baseDate.setDate(baseDate.getDate() - 1);
+        /* ═══════════ Themes ═══════════ */
+        var themes = {
+            midnight: {
+                '--bg':'#0d1117','--card-bg':'#161b22','--border':'#30363d',
+                '--text':'#c9d1d9','--text-bright':'#e6edf3','--text-muted':'#8b949e',
+                '--accent':'#58a6ff','--accent-glow':'rgba(88,166,255,0.55)',
+                '--shadow':'rgba(0,0,0,0.2)','--btn-fg':'#0d1117'
+            },
+            cream: {
+                '--bg':'#f3ede2','--card-bg':'#e9e2d3','--border':'#d0c5b0',
+                '--text':'#4a4035','--text-bright':'#2a2218','--text-muted':'#8a7d6c',
+                '--accent':'#a67c00','--accent-glow':'rgba(166,124,0,0.35)',
+                '--shadow':'rgba(60,45,20,0.09)','--btn-fg':'#fff'
+            },
+            forest: {
+                '--bg':'#0b1810','--card-bg':'#12201a','--border':'#244030',
+                '--text':'#b5cbbd','--text-bright':'#d6e9dc','--text-muted':'#688a72',
+                '--accent':'#4ade80','--accent-glow':'rgba(74,222,128,0.4)',
+                '--shadow':'rgba(0,0,0,0.3)','--btn-fg':'#0b1810'
+            },
+            dusk: {
+                '--bg':'#15122a','--card-bg':'#1d1938','--border':'#332c5a',
+                '--text':'#c2bbde','--text-bright':'#ddd8f0','--text-muted':'#787098',
+                '--accent':'#a78bfa','--accent-glow':'rgba(167,139,250,0.4)',
+                '--shadow':'rgba(0,0,0,0.3)','--btn-fg':'#15122a'
+            },
+            ember: {
+                '--bg':'#1a0f0b','--card-bg':'#261913','--border':'#3d281c',
+                '--text':'#d3bbae','--text-bright':'#e9d6cc','--text-muted':'#896e5e',
+                '--accent':'#f59e42','--accent-glow':'rgba(245,158,66,0.4)',
+                '--shadow':'rgba(0,0,0,0.3)','--btn-fg':'#1a0f0b'
             }
-            
-            const nextDay = new Date(baseDate);
-            nextDay.setDate(baseDate.getDate() + 1);
-            
-            const d1Str = `${baseDate.getDate()}-${baseDate.getMonth() + 1}-${baseDate.getFullYear()}`;
-            const d2Str = `${nextDay.getDate()}-${nextDay.getMonth() + 1}-${nextDay.getFullYear()}`;
-            
-            const url1 = `https://api.aladhan.com/v1/timingsByCity/${d1Str}?city=${city}&state=${state}&country=${country}&method=2`;
-            const url2 = `https://api.aladhan.com/v1/timingsByCity/${d2Str}?city=${city}&state=${state}&country=${country}&method=2`;
-            
+        };
+
+        function setTheme(name) {
+            var v = themes[name]; if (!v) return;
+            var r = document.documentElement;
+            for (var k in v) r.style.setProperty(k, v[k]);
+            document.querySelector('meta[name="theme-color"]').content = v['--bg'];
+            document.querySelectorAll('.tdot').forEach(function(d) {
+                d.classList.toggle('active', d.dataset.t === name);
+            });
+            try { localStorage.setItem('nw-theme', name); } catch(e) {}
+        }
+
+        (function() {
             try {
-                const [res1, res2] = await Promise.all([
-                    fetch(url1).then(r => r.json()),
-                    fetch(url2).then(r => r.json())
+                var s = localStorage.getItem('nw-theme');
+                if (s && themes[s]) setTheme(s);
+            } catch(e) {}
+        })();
+
+        var tbtn = document.getElementById('tbtn');
+        var tpanel = document.getElementById('tpanel');
+        tbtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            tpanel.classList.toggle('open');
+        });
+        tbtn.addEventListener('touchend', function(e) { e.stopPropagation(); });
+        document.querySelectorAll('.tdot').forEach(function(d) {
+            d.addEventListener('click', function(e) {
+                e.stopPropagation();
+                setTheme(this.dataset.t);
+                setTimeout(function() { tpanel.classList.remove('open'); }, 120);
+            });
+        });
+        document.addEventListener('click', function(e) {
+            if (!tpanel.contains(e.target) && !tbtn.contains(e.target)) {
+                tpanel.classList.remove('open');
+            }
+        });
+        document.addEventListener('touchstart', function(e) {
+            if (!tpanel.contains(e.target) && !tbtn.contains(e.target)) {
+                tpanel.classList.remove('open');
+            }
+        }, { passive: true });
+
+        /* ═══════════ State ═══════════ */
+        var midDate, lastThirdDate, nextUpdateDate;
+        var use24 = false, dateMode = 0, footerPane = 0;
+        var fullDateStr = '';
+        var moons = ['🌙','🌓','🌔','🌕','🌖','🌘'];
+        var mi = 0;
+        var starGlyphs = ['✨','⭐','🌟','💫'];
+        var si = 0;
+
+        /* ═══ 1. Background: tap empty space → cluster of drifting sparkles ═══ */
+        document.body.addEventListener('click', function(e) {
+            if (e.target !== document.body) return;
+            var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+            for (var i = 0; i < 4; i++) {
+                (function(delay) {
+                    setTimeout(function() {
+                        var el = document.createElement('div');
+                        el.className = 'sparkle';
+                        var glyphs = ['·','✦','⋅','⋆','✧','·'];
+                        el.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
+                        el.style.left = (e.clientX + (Math.random() - 0.5) * 44 - 5) + 'px';
+                        el.style.top  = (e.clientY + (Math.random() - 0.5) * 30 - 5) + 'px';
+                        el.style.color = accent;
+                        el.style.setProperty('--dx', ((Math.random() - 0.5) * 28) + 'px');
+                        document.body.appendChild(el);
+                        setTimeout(function() { el.remove(); }, 2700);
+                    }, delay);
+                })(i * 50);
+            }
+        });
+
+        /* ═══ 2. Title: click → animated glow shimmer ═══ */
+        var titleEl = document.getElementById('title');
+        titleEl.addEventListener('click', function() {
+            this.classList.remove('glow');
+            void this.offsetWidth;
+            this.classList.add('glow');
+        });
+
+        /* ═══ 3. Date: click → cycle full / gregorian / hijri ═══ */
+        var dateEl = document.getElementById('date-display');
+        dateEl.addEventListener('click', function() {
+            dateMode = (dateMode + 1) % 3;
+            this.classList.add('out');
+            var self = this;
+            setTimeout(function() {
+                var p = fullDateStr.split(' | ');
+                if (dateMode === 1)      self.innerText = p[0] || fullDateStr;
+                else if (dateMode === 2) self.innerText = p[1] || fullDateStr;
+                else                     self.innerText = fullDateStr;
+                self.classList.remove('out');
+            }, 260);
+        });
+
+        /* ═══ 4. Card: tilt on move + double-tap/click ring ═══ */
+        var card = document.getElementById('card');
+        var lastCardTap = 0;
+        function tiltCard(cx, cy) {
+            var r = card.getBoundingClientRect();
+            var x = (cx - r.left) / r.width - 0.5;
+            var y = (cy - r.top) / r.height - 0.5;
+            card.style.transform = 'perspective(600px) rotateY(' + (x * 8) + 'deg) rotateX(' + (-y * 8) + 'deg)';
+        }
+        function resetTilt() { card.style.transform = 'perspective(600px) rotateY(0) rotateX(0)'; }
+        function cardRing() {
+            card.classList.remove('ring'); void card.offsetWidth; card.classList.add('ring');
+            setTimeout(function() { card.classList.remove('ring'); }, 1600);
+        }
+        card.addEventListener('mousemove', function(e) { tiltCard(e.clientX, e.clientY); });
+        card.addEventListener('mouseleave', resetTilt);
+        card.addEventListener('touchstart', function(e) {
+            var now = Date.now();
+            if (now - lastCardTap < 350) { cardRing(); lastCardTap = 0; }
+            else { lastCardTap = now; }
+        }, { passive: true });
+        card.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+            tiltCard(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: false });
+        card.addEventListener('touchend', resetTilt);
+        card.addEventListener('dblclick', cardRing);
+
+        /* ═══ 5. Moon label: click → cycle phase emoji + pop ═══ */
+        var midLabel = document.getElementById('mid-label');
+        midLabel.addEventListener('click', function() {
+            mi = (mi + 1) % moons.length;
+            this.textContent = moons[mi] + ' Middle of the Night';
+            this.classList.remove('pop'); void this.offsetWidth; this.classList.add('pop');
+        });
+
+        /* ═══ 6. Star label: click → cycle sparkle emoji + pop ═══ */
+        var ltLabel = document.getElementById('lt-label');
+        ltLabel.addEventListener('click', function() {
+            si = (si + 1) % starGlyphs.length;
+            this.textContent = starGlyphs[si] + ' Last Third Begins';
+            this.classList.remove('pop'); void this.offsetWidth; this.classList.add('pop');
+        });
+
+        /* ═══ 7. Time values: click → toggle 12h/24h with flip ═══ */
+        function fmt(d, h24) {
+            if (h24) return (d.getHours() < 10 ? '0' : '') + d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
+            var h = d.getHours(), m = d.getMinutes(), ap = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12;
+            return h + ':' + (m < 10 ? '0' : '') + m + ' ' + ap;
+        }
+        function paintTimes() {
+            if (midDate)       document.getElementById('mid-time').innerText = fmt(midDate, use24);
+            if (lastThirdDate) document.getElementById('last-third-time').innerText = fmt(lastThirdDate, use24);
+        }
+        function flipFormat() {
+            use24 = !use24;
+            var a = document.getElementById('mid-time'), b = document.getElementById('last-third-time');
+            a.classList.add('flip'); b.classList.add('flip');
+            setTimeout(function() { paintTimes(); a.classList.remove('flip'); b.classList.remove('flip'); }, 240);
+        }
+        document.getElementById('mid-time').addEventListener('click', flipFormat);
+        document.getElementById('last-third-time').addEventListener('click', flipFormat);
+
+        /* ═══ 8. Countdowns: tap → glow + scale pulse ═══ */
+        document.querySelectorAll('.countdown').forEach(function(el) {
+            el.addEventListener('click', function() {
+                this.classList.remove('pulse'); void this.offsetWidth; this.classList.add('pulse');
+                var self = this;
+                setTimeout(function() { self.classList.remove('pulse'); }, 550);
+            });
+        });
+
+        /* ═══ 9. Footer: click → toggle info panes ═══ */
+        document.getElementById('footer').addEventListener('click', function() {
+            footerPane = 1 - footerPane;
+            var a = document.getElementById('f-up'), b = document.getElementById('f-loc');
+            a.className = 'fp ' + (footerPane === 0 ? 'on' : 'off');
+            b.className = 'fp ' + (footerPane === 1 ? 'on' : 'off');
+        });
+
+        /* ════════════════ Original app logic ════════════════ */
+        async function fetchTimes() {
+            var city = "Katy", state = "Texas", country = "US";
+            var now = new Date();
+
+            var baseDate = new Date(now);
+            if (baseDate.getHours() < 5) baseDate.setDate(baseDate.getDate() - 1);
+
+            var nextDay = new Date(baseDate);
+            nextDay.setDate(baseDate.getDate() + 1);
+
+            var d1Str = baseDate.getDate() + '-' + (baseDate.getMonth() + 1) + '-' + baseDate.getFullYear();
+            var d2Str = nextDay.getDate() + '-' + (nextDay.getMonth() + 1) + '-' + nextDay.getFullYear();
+
+            var url1 = 'https://api.aladhan.com/v1/timingsByCity/' + d1Str + '?city=' + city + '&state=' + state + '&country=' + country + '&method=2';
+            var url2 = 'https://api.aladhan.com/v1/timingsByCity/' + d2Str + '?city=' + city + '&state=' + state + '&country=' + country + '&method=2';
+
+            try {
+                var res = await Promise.all([
+                    fetch(url1).then(function(r) { return r.json(); }),
+                    fetch(url2).then(function(r) { return r.json(); })
                 ]);
-                
-                const maghribParts = res1.data.timings.Maghrib.split(":");
-                const maghribDate = new Date(baseDate);
-                maghribDate.setHours(parseInt(maghribParts[0]), parseInt(maghribParts[1]), 0, 0);
 
-                const fajrParts = res2.data.timings.Fajr.split(":");
-                const fajrDate = new Date(nextDay);
-                fajrDate.setHours(parseInt(fajrParts[0]), parseInt(fajrParts[1]), 0, 0);
+                var mp = res[0].data.timings.Maghrib.split(":");
+                var maghribDate = new Date(baseDate);
+                maghribDate.setHours(parseInt(mp[0]), parseInt(mp[1]), 0, 0);
 
-                const durationMs = fajrDate.getTime() - maghribDate.getTime();
-                midDate = new Date(maghribDate.getTime() + (durationMs / 2));
-                lastThirdDate = new Date(maghribDate.getTime() + (durationMs * (2/3)));
-                
+                var fp = res[1].data.timings.Fajr.split(":");
+                var fajrDate = new Date(nextDay);
+                fajrDate.setHours(parseInt(fp[0]), parseInt(fp[1]), 0, 0);
+
+                var dur = fajrDate.getTime() - maghribDate.getTime();
+                midDate = new Date(maghribDate.getTime() + dur / 2);
+                lastThirdDate = new Date(maghribDate.getTime() + dur * (2 / 3));
+
                 nextUpdateDate = new Date(now);
-                if (nextUpdateDate.getHours() >= 5) {
-                    nextUpdateDate.setDate(nextUpdateDate.getDate() + 1);
-                }
+                if (nextUpdateDate.getHours() >= 5) nextUpdateDate.setDate(nextUpdateDate.getDate() + 1);
                 nextUpdateDate.setHours(5, 0, 0, 0);
 
-                function formatTime(d) {
-                    let h = d.getHours();
-                    let m = d.getMinutes();
-                    const ampm = h >= 12 ? "PM" : "AM";
-                    h = h % 12 || 12;
-                    return `${h}:${m < 10 ? '0'+m : m} ${ampm}`;
-                }
-                
-                document.getElementById('mid-time').innerText = formatTime(midDate);
-                document.getElementById('last-third-time').innerText = formatTime(lastThirdDate);
-                
-                const greg1 = res1.data.date.gregorian;
-                const greg2 = res2.data.date.gregorian;
-                const hijri = res1.data.date.hijri;
-                
-                let dateString = `${greg1.month.en} ${greg1.day}/${greg2.day}`;
-                if (greg1.month.en !== greg2.month.en) {
-                    dateString = `${greg1.month.en} ${greg1.day} / ${greg2.month.en} ${greg2.day}`;
-                }
-                
-                document.getElementById('date-display').innerText = `${greg1.weekday.en}, ${dateString} | ${hijri.day} ${hijri.month.en} ${hijri.year}`;
-                
+                document.getElementById('mid-time').innerText = fmt(midDate, false);
+                document.getElementById('last-third-time').innerText = fmt(lastThirdDate, false);
+
+                var g1 = res[0].data.date.gregorian;
+                var g2 = res[1].data.date.gregorian;
+                var hj = res[0].data.date.hijri;
+
+                var ds = g1.month.en + ' ' + g1.day + '/' + g2.day;
+                if (g1.month.en !== g2.month.en) ds = g1.month.en + ' ' + g1.day + ' / ' + g2.month.en + ' ' + g2.day;
+
+                fullDateStr = g1.weekday.en + ', ' + ds + ' | ' + hj.day + ' ' + hj.month.en + ' ' + hj.year;
+                document.getElementById('date-display').innerText = fullDateStr;
+
                 setInterval(updateCountdowns, 1000);
                 updateCountdowns();
-                
+
             } catch (error) {
                 document.getElementById('date-display').innerText = "Error loading times. Check internet.";
             }
         }
 
         function updateCountdowns() {
-            const now = new Date().getTime();
+            var now = new Date().getTime();
 
-            function getDiff(targetTime) {
-                const diff = targetTime.getTime() - now;
-                if (diff <= 0) return "Time has passed";
-                
-                const h = Math.floor(diff / (1000 * 60 * 60));
-                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((diff % (1000 * 60)) / 1000);
-                
-                const mStr = m < 10 ? "0" + m : m;
-                const sStr = s < 10 ? "0" + s : s;
-                return `${h}h ${mStr}m ${sStr}s`;
+            function diff(t) {
+                var d = t.getTime() - now;
+                if (d <= 0) return "Time has passed";
+                var h = Math.floor(d / 3600000);
+                var m = Math.floor((d % 3600000) / 60000);
+                var s = Math.floor((d % 60000) / 1000);
+                return h + 'h ' + (m < 10 ? '0' : '') + m + 'm ' + (s < 10 ? '0' : '') + s + 's';
             }
 
-            if (midDate) document.getElementById('mid-countdown').innerText = getDiff(midDate);
-            if (lastThirdDate) document.getElementById('last-third-countdown').innerText = getDiff(lastThirdDate);
-            
+            if (midDate)       document.getElementById('mid-countdown').innerText = diff(midDate);
+            if (lastThirdDate) document.getElementById('last-third-countdown').innerText = diff(lastThirdDate);
+
             if (nextUpdateDate) {
-                const updateDiff = nextUpdateDate.getTime() - now;
-                if (updateDiff <= 0) {
-                    window.location.reload(); 
-                } else {
-                    const h = Math.floor(updateDiff / (1000 * 60 * 60));
-                    const m = Math.floor((updateDiff % (1000 * 60 * 60)) / (1000 * 60));
-                    const s = Math.floor((updateDiff % (1000 * 60)) / 1000);
-                    const mStr = m < 10 ? "0" + m : m;
-                    const sStr = s < 10 ? "0" + s : s;
-                    document.getElementById('update-countdown').innerText = `${h}h ${mStr}m ${sStr}s`;
-                }
+                var ud = nextUpdateDate.getTime() - now;
+                if (ud <= 0) { window.location.reload(); return; }
+                var h = Math.floor(ud / 3600000);
+                var m = Math.floor((ud % 3600000) / 60000);
+                var s = Math.floor((ud % 60000) / 1000);
+                var el = document.getElementById('update-countdown');
+                if (el) el.innerText = h + 'h ' + (m < 10 ? '0' : '') + m + 'm ' + (s < 10 ? '0' : '') + s + 's';
             }
         }
-        
+
         fetchTimes();
     </script>
 </body>
