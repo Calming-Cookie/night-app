@@ -68,8 +68,6 @@
             const city = "Katy", state = "Texas", country = "US";
             const now = new Date();
             
-            // To ensure the night calculation works even after midnight, 
-            // we logically start the new day calculation at 5:00 AM.
             const baseDate = new Date(now);
             if (baseDate.getHours() < 5) {
                 baseDate.setDate(baseDate.getDate() - 1);
@@ -90,7 +88,6 @@
                     fetch(url2).then(r => r.json())
                 ]);
                 
-                // Set Maghrib and Fajr Date objects
                 const maghribParts = res1.data.timings.Maghrib.split(":");
                 const maghribDate = new Date(baseDate);
                 maghribDate.setHours(parseInt(maghribParts[0]), parseInt(maghribParts[1]), 0, 0);
@@ -99,19 +96,16 @@
                 const fajrDate = new Date(nextDay);
                 fajrDate.setHours(parseInt(fajrParts[0]), parseInt(fajrParts[1]), 0, 0);
 
-                // Calculate durations in milliseconds
                 const durationMs = fajrDate.getTime() - maghribDate.getTime();
                 midDate = new Date(maghribDate.getTime() + (durationMs / 2));
                 lastThirdDate = new Date(maghribDate.getTime() + (durationMs * (2/3)));
                 
-                // Set the next update target to the upcoming 5:00 AM
                 nextUpdateDate = new Date(now);
                 if (nextUpdateDate.getHours() >= 5) {
                     nextUpdateDate.setDate(nextUpdateDate.getDate() + 1);
                 }
                 nextUpdateDate.setHours(5, 0, 0, 0);
 
-                // Display formatting
                 function formatTime(d) {
                     let h = d.getHours();
                     let m = d.getMinutes();
@@ -123,12 +117,18 @@
                 document.getElementById('mid-time').innerText = formatTime(midDate);
                 document.getElementById('last-third-time').innerText = formatTime(lastThirdDate);
                 
-                // Set the display date (Gregorian and Hijri)
+                // Formats the split Gregorian Date
+                const greg1 = res1.data.date.gregorian;
+                const greg2 = res2.data.date.gregorian;
                 const hijri = res1.data.date.hijri;
-                const greg = res1.data.date.gregorian;
-                document.getElementById('date-display').innerText = `${greg.weekday.en}, ${greg.month.en} ${greg.day} | ${hijri.day} ${hijri.month.en} ${hijri.year}`;
                 
-                // Start the live countdowns
+                let dateString = `${greg1.month.en} ${greg1.day}/${greg2.day}`;
+                if (greg1.month.en !== greg2.month.en) {
+                    dateString = `${greg1.month.en} ${greg1.day} / ${greg2.month.en} ${greg2.day}`;
+                }
+                
+                document.getElementById('date-display').innerText = `${greg1.weekday.en}, ${dateString} | ${hijri.day} ${hijri.month.en} ${hijri.year}`;
+                
                 setInterval(updateCountdowns, 1000);
                 updateCountdowns();
                 
@@ -148,7 +148,6 @@
                 const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                 const s = Math.floor((diff % (1000 * 60)) / 1000);
                 
-                // Format with leading zeros for neatness
                 const mStr = m < 10 ? "0" + m : m;
                 const sStr = s < 10 ? "0" + s : s;
                 return `${h}h ${mStr}m ${sStr}s`;
@@ -160,7 +159,6 @@
             if (nextUpdateDate) {
                 const updateDiff = nextUpdateDate.getTime() - now;
                 if (updateDiff <= 0) {
-                    // Force the app to automatically refresh and fetch new times at exactly 5:00 AM
                     window.location.reload(); 
                 } else {
                     const h = Math.floor(updateDiff / (1000 * 60 * 60));
